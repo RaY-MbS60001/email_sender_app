@@ -384,7 +384,7 @@
   <script>
     $(function() {
         // Load learnerships and categories from JSON
-        function loadLearnershipsAndCategories() {
+        function loadLearnershipsAndCategories() {   
             $.getJSON("/static/learnerships.json", function(data) {
                 // Populate categories
                 const $categoryFilter = $('.category-filter');
