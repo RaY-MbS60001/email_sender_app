@@ -470,7 +470,7 @@
                 const ok = (!txt || comp.includes(txt) || prog.includes(txt)) && (!cat || cc === cat);
                 if ($o.is(':selected') || ok) {
                     $o.show().prop('disabled', false);
-                } else {
+                } else {   
                     $o.hide().prop('disabled', true);
                 }
             });
