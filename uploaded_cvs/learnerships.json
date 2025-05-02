@@ -1,0 +1,23 @@
+{
+    "categories": [
+        "IT & Technology",
+        "Business & Finance", 
+        "Engineering",
+        "Healthcare",
+        "Digital Marketing",
+        "Management",
+        "Telecommunications",
+        "Manufacturing",
+        "Hospitality",
+        "Education"
+    ],
+    "learnerships": [
+        {
+            "company": "Diversity Empowerment",
+            "program": "Software Development",
+            "email": "info@diversityempowerment.co.za",
+            "icon": "diversity.png",
+            "category": "IT & Technology"
+        }
+    ]
+}

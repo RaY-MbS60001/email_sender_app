@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head><title>Batch Detail #{{ batch.id }}</title></head>
+<body>
+<h2>Batch #{{ batch.id }}</h2>
+<p><strong>Client:</strong> {{ batch.client.name }} ({{ batch.client.email }})</p>
+<p><strong>Status:</strong> {{ batch.status }}</p>
+<p><strong>Subject:</strong> {{ batch.subject }}</p>
+<p><strong>Body:</strong><br>{{ batch.body|replace('\n','<br>')|safe }}</p>
+<p><strong>CV:</strong> <a href="{{ url_for('uploaded_file', filename=batch.cv_filename) }}" target="_blank">Download CV</a></p>
+
+<h3>Recipient Emails</h3>
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th>Email</th><th>Status</th><th>Error</th></tr>
+{% for e in batch.emails %}
+<tr>
+  <td>{{ e.recipient_email }}</td>
+  <td>{{ e.status }}</td>
+  <td>{{ e.error or '' }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% if batch.status == 'pending' %}
+<form method="post">
+  <button name="action" value="approve" type="submit">Approve</button>
+  <button name="action" value="reject" type="submit">Reject</button>
+</form>
+{% else %}
+<a href="{{ url_for('admin_dashboard') }}">Back to Dashboard</a>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <ul>
+  {% for category, message in messages %}
+    <li style="color: {% if category == 'success' %}green{% elif category=='danger' %}red{% else %}black{% endif %}">{{ message }}</li>
+  {% endfor %}
+  </ul>
+  {% endif %}
+{% endwith %}
+</body>
+</html>

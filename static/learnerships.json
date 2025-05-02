@@ -1,0 +1,366 @@
+{
+    "categories": [
+        "IT & Technology",
+        "Business & Finance", 
+        "Engineering",
+        "Healthcare",
+        "Digital Marketing",
+        "Management",
+        "Telecommunications",
+        "Manufacturing",
+        "Hospitality",
+        "Education"
+    ],
+    "learnerships": [
+        {
+            "company": "Diversity Empowerment",
+            "program": "Software Development",
+            "email": "info@diversityempowerment.co.za",
+            "icon": "diversity.png",
+            "category": "IT & Technology"
+        },
+        {
+            "company": "Sparrow Portal",
+            "program": "Business Administration",
+            "email": "enquiries@sparrowportal.co.za",
+            "icon": "sparrow.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "Impactful Co.",
+            "program": "Advanced IT Training",
+            "email": "sihle.nyanga@impactful.co.za",
+            "icon": "impactful.png",
+            "category": "IT & Technology"
+        },
+        {
+            "company": "CSG Skills",
+            "program": "Skill Development Program",
+            "email": "mseleke@csgskills.co.za",
+            "icon": "csgskills.png",
+            "category": "Education"
+        },
+        {
+            "company": "Afrec Consulting",
+            "program": "Consultancy Learnership",
+            "email": "consultant@afrec.co.za",
+            "icon": "afrec.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "Vision Academy",
+            "program": "Visionary Training Program",
+            "email": "recruit@visionacademy.co.za",
+            "icon": "visionacademy.png",
+            "category": "Education"
+        },
+        {
+            "company": "The Skills Hub",
+            "program": "Skills Enhancement",
+            "email": "info@theskillshub.co.za",
+            "icon": "theskillshub.png",
+            "category": "Education"
+        },
+        {
+            "company": "Rivoni Consultancy",
+            "program": "Consultancy Workshop",
+            "email": "careers@rivoningoconsultancy.co.za",
+            "icon": "rivoni.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "OKS Technology",
+            "program": "IT Training",
+            "email": "recruitment@oks.co.za",
+            "icon": "oks.png",
+            "category": "IT & Technology"
+        },
+        {
+            "company": "I-Fundi",
+            "program": "Skill Development Program",
+            "email": "farina.bowen@i-fundi.com",
+            "icon": "ifundi.png",
+            "category": "Education"
+        },
+        {
+            "company": "MSc Consulting",
+            "program": "Consulting Excellence",
+            "email": "za031-cvapplications@msc.com",
+            "icon": "msc.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "Liberty College",
+            "program": "College Learnership",
+            "email": "funda@liberty-college.co.za",
+            "icon": "libertycollege.png",
+            "category": "Education"
+        },
+        {
+            "company": "Siseko Training",
+            "program": "Professional Development",
+            "email": "ayandam@sisekelo.co.za",
+            "icon": "siseko.png",
+            "category": "Education"
+        },
+        {
+            "company": "AAAT Academy",
+            "program": "Comprehensive Learning",
+            "email": "apply@aaat.co.za",
+            "icon": "aaat.png",
+            "category": "Education"
+        },
+        {
+            "company": "LearnSETA Online",
+            "program": "SETAs Training",
+            "email": "hr@learnseta.online",
+            "icon": "learnseta.png",
+            "category": "Education"
+        },
+        {
+            "company": "Amphisa Training",
+            "program": "Advanced Skills Training",
+            "email": "tigane@amphisa.co.za",
+            "icon": "amphisa.png",
+            "category": "Education"
+        },
+        {
+            "company": "AfriSam",
+            "program": "Aggregate Training",
+            "email": "cm.gpnorthaggregate@za.afrisam.com",
+            "icon": "afrisam.png",
+            "category": "Manufacturing"
+        },
+        {
+            "company": "iLearn",
+            "program": "E-Learning Solutions",
+            "email": "tinyikom@ilearn.co.za",
+            "icon": "ilearn.png",
+            "category": "Education"
+        },
+        {
+            "company": "TechTisa",
+            "program": "Technology Solutions",
+            "email": "prabashini@techtisa.co.za",
+            "icon": "techtisa.png",
+            "category": "IT & Technology"
+        },
+        {
+            "company": "Fitho Consulting",
+            "program": "Consulting Excellence",
+            "email": "cv@fitho.co.za",
+            "icon": "fitho.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "Training Force",
+            "program": "Workforce Training",
+            "email": "application@trainingforce.co.za",
+            "icon": "trainingforce.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "TidySWIP",
+            "program": "Professional Cleaning Training",
+            "email": "learnerships@tidyswip.co.za",
+            "icon": "tidyswip.png",
+            "category": "Manufacturing"
+        },
+        {
+            "company": "Nthuse Foundation",
+            "program": "Empowerment Program",
+            "email": "brandons@nthusefoundation.co.za",
+            "icon": "nthusefoundation.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "Ample Recruitment",
+            "program": "Recruitment Training",
+            "email": "cv@amplerecruitment.co.za",
+            "icon": "amplerecruitment.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "i-People Solutions",
+            "program": "People Management",
+            "email": "cv@i-people.co.za",
+            "icon": "ipeople.png",
+            "category": "Management"
+        },
+        {
+            "company": "FACTS Academy",
+            "program": "Research & Analytics",
+            "email": "recruitment3@factsa.co.za",
+            "icon": "factsa.png",
+            "category": "Education"
+        },
+        {
+            "company": "iKworx",
+            "program": "Tech Solutions",
+            "email": "recruitment@ikworx.co.za",
+            "icon": "ikworx.png",
+            "category": "IT & Technology"
+        },
+        {
+            "company": "APD Johannesburg",
+            "program": "Career Development",
+            "email": "recruitment@apdjhb.co.za",
+            "icon": "apdjhb.png",
+            "category": "Management"
+        },
+        {
+            "company": "SkillTech SA",
+            "program": "Technical Skill Enhancement",
+            "email": "query@skilltechsa.co.za",
+            "icon": "skilltechsa.png",
+            "category": "Engineering"
+        },
+        {
+            "company": "Camblish Group",
+            "program": "Quality Assurance Training",
+            "email": "qualitycontrol@camblish.co.za",
+            "icon": "camblish.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "BPCHR Solutions",
+            "program": "HR Solutions",
+            "email": "queen@bpchrsolutions.co.za",
+            "icon": "bpchrsolutions.png",
+            "category": "Management"
+        },
+        {
+            "company": "CTU Training",
+            "program": "Tech Training Solutions",
+            "email": "walter.mngomezulu@ctutraining.co.za",
+            "icon": "ctutraining.png",
+            "category": "IT & Technology"
+        },
+        {
+            "company": "U-Belong",
+            "program": "Workplace Inclusion",
+            "email": "work@u-belong.co.za",
+            "icon": "ubelong.png",
+            "category": "Management"
+        },
+        {
+            "company": "eStudy",
+            "program": "Online Learning Solutions",
+            "email": "recruitment@estudysa.co.za",
+            "icon": "estudy.png",
+            "category": "Education"
+        },
+        {
+            "company": "Zigna Training",
+            "program": "IT Training",
+            "email": "ayo@zignatrainingonline.co.za",
+            "icon": "zigna.png",
+            "category": "IT & Technology"
+        },
+        {
+            "company": "CDPA",
+            "program": "Professional Development",
+            "email": "amelia@cdpa.co.za",
+            "icon": "cdpa.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "Afrec Consulting",
+            "program": "Multiple Consulting Programs",
+            "email": "cv@afrec.co.za",
+            "icon": "afrec.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "Bidvest Catering",
+            "program": "Catering Skills",
+            "email": "training2@bidvestcatering.co.za",
+            "icon": "bidvestcatering.png",
+            "category": "Hospitality"
+        },
+        {
+            "company": "CDA Solutions",
+            "program": "Development Solutions",
+            "email": "faith.khethani@cdasolutions.co.za",
+            "icon": "cdasolutions.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "Tiger Brands",
+            "program": "Culinary Arts",
+            "email": "culinary.recruitment@tigerbrands.com",
+            "icon": "tigerbrands.png",
+            "category": "Manufacturing"
+        },
+        {
+            "company": "Retshepeng Training",
+            "program": "Rural Development Training",
+            "email": "training@retshepeng.co.za",
+            "icon": "retshepeng.png",
+            "category": "Education"
+        },
+        {
+            "company": "KDS Training",
+            "program": "Skill Development",
+            "email": "recruitment@kdstraining.co.za",
+            "icon": "kdstraining.png",
+            "category": "Education"
+        },
+        {
+            "company": "Cowhirl Academy",
+            "program": "Innovative Learning",
+            "email": "learn@cowhirlacademy.co.za",
+            "icon": "cowhirlacademy.png",
+            "category": "Education"
+        },
+        {
+            "company": "Roah Consulting",
+            "program": "Strategic Consulting",
+            "email": "recruitment@roahconsulting.co.za",
+            "icon": "roahconsulting.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "Kboneng Consulting",
+            "program": "Business Consulting",
+            "email": "admin@kbonengconsulting.co.za",
+            "icon": "kbonengconsulting.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "NZ Consultants",
+            "program": "Consulting Services",
+            "email": "victory@nzconsultancts.co.za",
+            "icon": "nzconsultants.png",
+            "category": "Business & Finance"
+        },
+        {
+            "company": "AAAT Academy",
+            "program": "Professional Training",
+            "email": "leratomoraba@aaat.co.za",
+            "icon": "aaat.png",
+            "category": "Education"
+        },
+        {
+            "company": "StratisM",
+            "program": "Strategic Management",
+            "email": "learnership@stratism.co.za",
+            "icon": "stratism.png",
+            "category": "Management"
+        },
+        {
+            "company": "MPower Smart",
+            "program": "Smart Learning Solutions",
+            "email": "recruitment@mpowersmart.co.za",
+            "icon": "mpowersmart.png",
+            "category": "IT & Technology"
+        },
+        {
+            "company": "Afrika Tikkun",
+            "program": "Community Development Program",
+            "email": "lucyc@afrikatikkun.org",
+            "icon": "afrikatikkun.png",
+            "category": "Education"
+        }
+    ]
+}

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Submit Application</title>
+
+  <!-- External CSS dependencies -->
+   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+  <link 
+    href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css" 
+    rel="stylesheet" />
+
+  <style>
+  :root {
+    /* Dark mode palette */
+    --bg-page:      #2C3240;
+    --bg-card:      #323A50;
+    --bg-input:     #20242F;
+    --fg-primary:   #E3EAF2;
+    --fg-secondary: #A0A8BD;
+    --accent-blue:  #5A9BFF;
+    --accent-green: #4CD137;
+    --accent-red:   #E84118;
+    --border-radius:8px;
+    --transition:   0.25s ease-in-out;
+  }
+
+  * {
+    box-sizing: border-box;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  /* Example CSS */
+  .dropdown-item {
+    background-color: #f0f0f0; /* Default background for dropdown items */
+    color: #333; /* Default text color */
+  }
+
+  .dropdown-item:hover, .dropdown-item:focus {
+    background-color: #007bff; /* Highlight color on hover */
+    color: #a2a2a2; /* Text color on hover */
+  }
+
+  .dropdown-item-title {
+    font-weight: bold;
+  }
+
+  .dropdown-item-subtitle {
+    color: #888; /* Color for subtitle text */
+  }
+  body {
+    background-color: var(--bg-page);
+    color: var(--fg-primary);
+    margin: 0;
+    min-height: 100vh;
+    padding: 1.5rem;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--fg-primary);
+  }
+  
+  /* Select2 container adjustment for better visibility */
+  .select2-container--default .select2-selection {
+      background-color: var(--bg-card); /* This darkens the background for high contrast */
+      border-radius: var(--border-radius);
+      border: 1px solid #414A63; /* Match other input borders for consistency */
+      color: var(--fg-primary);
+      min-height: 3.5em;
+      padding: 0.3em 0.5em;
+  }
+
+  /* For selected options to maintain consistency */
+  .select2-container--default .select2-results__option[aria-selected="true"] {
+      background-color: var(--accent-blue); /* Highlight selected options */
+      color: #ffffff; /* Ensure text is visible */
+  }
+
+  /* Highlighted options */
+  .select2-container--default .select2-results__option--highlighted {
+      background-color: var(--accent-blue);
+      color: #ffffff;
+  }
+
+  /* General option styling brought up to match theme */
+  .select2-container--default .select2-results__option {
+      background-color: var(--bg-card);
+      color: var(--fg-primary);
+  }
+
+  /* Selected items (pills) styling */
+  .select2-container--default .select2-selection__choice {
+      background-color: var(--bg-input); /* Use input background for selected items for unity */
+      border-radius: var(--border-radius);
+      color: var(--fg-primary); /* High visibility text */
+      border: 1px solid #414A63;
+      padding: 0.25em 0.5em;
+  }
+
+  /* Remove button on selected choice */
+  .select2-container--default .select2-selection__choice__remove {
+      color: var(--accent-red); /* Provides a clear disconnect action */
+      margin-right: 0.3em;
+      cursor: pointer;
+  }
+
+  .select2-dropdown {
+    background-color: var(--bg-card);
+    color: white;
+  }
+  
+  /* Hide the default file input */
+  input[type="file"] {
+      display: none;
+  }
+
+  /* Style the custom label button */
+  .custom-file-upload {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--border-radius);
+    background-color: red;
+    color: var(--fg-primary);
+    cursor: pointer;
+    transition: background-color var(--transition);
+    margin-right: 1rem; /* Spacing between button and file name */
+  }
+
+  .custom-file-upload:hover {
+    background-color: var(--accent-blue);
+    color: white;
+  }
+
+  .select2-results__option {
+    color: var(--fg-primary);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  input[type="text"],
+  select,
+  .select2-container--default .select2-selection--multiple,
+  textarea,
+  input[type="file"] {
+    width: 100%;
+    background-color: var(--bg-input);
+    color: var(--fg-primary);
+    border: 1px solid #414A63;
+    border-radius: var(--border-radius);
+    padding: 0.6rem 0.8rem;
+    font-size: 0.95rem;
+    transition: border-color var(--transition);
+  }
+
+  input:focus,
+  select:focus,
+  .select2-container--default .select2-selection--multiple:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+  }
+
+  /* live file name */
+  .file-name {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: gold;
+  }
+
+  .selected-count {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--fg-secondary);
+  }
+
+  button.submit-btn {
+    background-color: var(--accent-blue);
+    color: white;
+    font-size: 1rem;
+    padding: 0.8rem 1.2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color var(--transition);
+    width: 100%;
+  }
+  button.submit-btn:hover {
+    background-color: #407eff;
+  }
+
+  /* Custom pills for status */
+  .status-pill {
+    display: inline-block;
+    padding: 0.3em 0.8em;
+    font-size: 0.85em;
+    border-radius: var(--border-radius);
+    color: #fff;
+    margin-bottom: 1rem;
+  }
+  
+  .pill-pending  { background: #2F80ED; }
+  .pill-approved { background: #27AE60; }
+  .pill-rejected { background: #EB5757; }
+
+  /* Success toast */
+  #successToast {
+    display: none;
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: #27AE60;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  }
+  /* --- START: Logout Link Button Styles --- */
+  .logout-link-button {
+    display: inline-block; /* Allow padding and centering */
+    padding: 0.6rem 1.2rem;
+    background-color: var(--accent-red); /* Use red for logout */
+    color: white;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    transition: background-color var(--transition);
+    text-align: center;
+  }
+  .logout-link-button:hover {
+    background-color: #c0392b; /* Darker red */
+    color: white;
+  }
+  /* --- END: Logout Link Button Styles --- */
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Submit Application</h1>
+
+    <!-- Flash messages (server-rendered) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="status-pill pill-{{category}}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Example of Jinja batch_status -->
+    {% if batch_status %}
+      {% set cls = {
+        'pending'  : 'pill-pending', 
+        'approved' : 'pill-approved',
+        'sending'  : 'pill-approved',
+        'completed': 'pill-approved',
+        'rejected' : 'pill-rejected'
+      }[batch_status] or 'pill-pending' %}
+      <div class="status-pill {{ cls }}">
+        {% if batch_status=='pending'  %}Awaiting admin approval
+        {% elif batch_status=='approved'%}Approved – sending now
+        {% elif batch_status=='sending' %}Sending…
+        {% elif batch_status=='completed' %}Completed
+        {% elif batch_status=='rejected' %}Rejected{% endif %}
+      </div>
+    {% endif %}
+
+    <form id="applicationForm" method="POST" enctype="multipart/form-data">
+      <!-- search & category filters -->
+      <div class="form-group" style="display:flex; gap:1rem; flex-wrap:wrap;">
+        <div style="flex:2">
+          <label>Search Learnerships</label>
+          <input type="text" class="search-box" placeholder="company or program…">
+        </div>
+        <div style="flex:1">
+          <label>Category</label>
+          <select class="category-filter">
+            <option value="">All</option>
+            {% for cat in categories %}
+              <option value="{{cat}}">{{cat}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Select Learnerships (max 175)</label>
+        <select class="learnership-select" name="learnerships[]" multiple>
+          {% for l in learnerships %}
+            <option value="{{ l.id }}"
+                    data-icon="{{l.icon}}"
+                    data-company="{{l.company}}"
+                    data-program="{{l.program}}"
+                    data-category="{{l.category}}">
+              {{l.company}} — {{l.program}}
+            </option>
+          {% endfor %}
+        </select>
+        <div class="selected-count">
+          Selected: <span id="selectionCount">0</span>/175
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="subject">Subject</label>
+        <input type="text"
+               id="subject"
+               name="subject"
+               value="Application for Learnership Opportunities – ICT Sector"
+               required>
+      </div>
+
+      <div class="form-group">
+        <label for="body">Body</label>
+        <!-- Unique class for independent styling -->
+        <textarea id="body" name="body" class="rich-text-editor" rows="6" required>
+      Dear Hiring Team,
+      
+      I am writing to express my keen interest in the available learnerships within the ICT sector.
+      I have recently completed my BSc in Computer Science and Information Technology and possess a strong passion for innovation, coding, and continuous learning.
+      My attached CV provides more details about my qualifications and experiences.
+      
+      I am confident that my skills and dedication would make a positive contribution to your program.
+      Thank you for considering my application.
+      
+      Best regards,
+      Your Name
+        </textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Upload CV <small>(.pdf, .doc, .docx)</small></label>
+        <label for="file-upload" class="custom-file-upload">
+          Choose File
+        </label>
+        <input id="file-upload" type="file" name="cv_file" accept=".pdf,.doc,.docx" required>
+        <div class="file-name" id="fileName">No file chosen</div>
+      </div>
+
+      <button type="submit" class="submit-btn">Submit Application</button>
+    </form>
+        <!-- Add the logout link *after* the form, but still inside the container -->
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <a href="{{ url_for('logout') }}" class="logout-link-button">Log Out</a>
+        </div>
+  </div>
+
+  <!-- ephemeral success toast -->
+  <div id="successToast">Your application was submitted! 🎉</div>
+
+  <!-- JS dependencies -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script 
+    src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js">
+  </script>
+  <script src="https://cdn.tiny.cloud/1/YOUR_API_KEY/tinymce/6/tinymce.min.js"></script>
+  <script src="ko3udwor76fbr7mcpshsvvaqtiuxwi2tb7od7ocza5a87wjl"></script>
+  <script src="https://cdn.tiny.cloud/1/ko3udwor76fbr7mcpshsvvaqtiuxwi2tb7od7ocza5a87wjl/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    $(function() {
+        // Load learnerships and categories from JSON
+        function loadLearnershipsAndCategories() {
+            $.getJSON("/static/learnerships.json", function(data) {
+                // Populate categories
+                const $categoryFilter = $('.category-filter');
+                $categoryFilter.empty();
+                $categoryFilter.append(new Option("All", ""));
+                data.categories.forEach(category => {
+                    const option = new Option(category, category);
+                    $categoryFilter.append(option);
+                });
+    
+                // Populate learnerships
+                const $learnershipSelect = $('.learnership-select');
+                $learnershipSelect.empty();
+    
+                data.learnerships.forEach(learnership => {
+                    const option = new Option(
+                        `${learnership.company} — ${learnership.program}`,
+                        learnership.id,
+                        false,
+                        false
+                    );
+    
+                    $(option).attr('data-icon', learnership.icon);
+                    $(option).attr('data-company', learnership.company);
+                    $(option).attr('data-program', learnership.program);
+                    $(option).attr('data-category', learnership.category);
+    
+                    $learnershipSelect.append(option);
+                });
+    
+                $learnershipSelect.trigger('change.select2');
+            });
+        }
+    
+        // Call function to load learnerships and categories
+        loadLearnershipsAndCategories();
+    
+        // Initialize Select2 with custom template
+        const iconPath = "{{ url_for('static', filename='icons/') }}";
+        function fmt(opt) {
+            if (!opt.id) return opt.text;
+            const $o = $(opt.element);
+            const icon = $o.data('icon'),
+                  company = $o.data('company'),
+                  program = $o.data('program'),
+                  category = $o.data('category');
+    
+            return $(`
+                <div style="display:flex; align-items:center;">
+                    <img src="${iconPath}${icon}"
+                         onerror="this.src='${iconPath}default.png'"
+                         style="width:32px; height:32px; margin-right:8px;"/>
+                    <div>
+                        <div style="font-weight:500;color:#E3EAF2;">${company}</div>
+                        <div style="font-size:0.85em;color:#A0A8BD;">${program}</div>
+                        <div style="font-size:0.75em;color:#888;">${category}</div>
+                    </div>
+                </div>`);
+        }
+    
+        $('.learnership-select')
+            .select2({
+                templateResult: fmt,
+                templateSelection: fmt,
+                placeholder: 'Select learnerships…',
+                closeOnSelect: false,
+                maximumSelectionLength: 175,
+                width: '100%'
+            })
+            .on('change', function() {
+                $('#selectionCount').text($(this).val()?.length || 0);
+            });
+    
+        // Filter functionality
+        function filterList() {
+            const txt = $('.search-box').val().toLowerCase().trim();
+            const cat = $('.category-filter').val();
+            $('.learnership-select option').each(function() {
+                const $o = $(this);
+                const comp = ($o.data('company') || '').toLowerCase();
+                const prog = ($o.data('program') || '').toLowerCase();
+                const cc   = ($o.data('category') || '');
+                const ok = (!txt || comp.includes(txt) || prog.includes(txt)) && (!cat || cc === cat);
+                if ($o.is(':selected') || ok) {
+                    $o.show().prop('disabled', false);
+                } else {
+                    $o.hide().prop('disabled', true);
+                }
+            });
+            $('.learnership-select').trigger('change.select2');
+        }
+    
+        $('.search-box').on('input', filterList);
+        $('.category-filter').on('change', filterList);
+        filterList();
+    
+        // Initialize TinyMCE
+        tinymce.init({
+            selector: '#body',
+            menubar: false,
+            toolbar: 'undo redo | bold italic | bullist numlist',
+            height: 200,
+            skin: 'oxide-dark',
+            content_css: 'dark'
+        });
+    
+        // Live file name display
+        $('input[type=file]').on('change', function(){
+            const file = this.files[0]?.name || 'No file chosen';
+            $('#fileName').text(file);
+        });
+    
+        // Form submit: confirm & toast
+        $('#applicationForm').on('submit', function(e) {
+            e.preventDefault(); // prevent real submit for demo
+            Swal.fire({
+                title: 'Submit your application?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#5A9BFF',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Yes, send it!'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    // here you'd do form.submit()
+                    // simulate success toast
+                    $('#successToast').fadeIn(200).delay(2500).fadeOut(300);
+                }
+            });
+        });
+    });
+  </script>
+</body>
+</html>

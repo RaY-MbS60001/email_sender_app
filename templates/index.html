@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Portal</title>
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --background-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --text-primary: #333;
+            --text-secondary: #666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: var(--background-gradient);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px var(--shadow-color);
+            padding: clamp(20px, 5vw, 40px);
+            margin: 20px;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: clamp(20px, 4vw, 35px);
+        }
+
+        .company-logo {
+            width: clamp(80px, 15vw, 150px);
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            font-size: clamp(20px, 4vw, 28px);
+        }
+
+        .login-options {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(15px, 3vw, 25px);
+        }
+
+        .login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(12px, 2.5vw, 16px) clamp(15px, 3vw, 25px);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: clamp(14px, 2.5vw, 16px);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .client-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .client-btn:hover {
+            background: #357abd;
+        }
+
+        .admin-btn {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .admin-btn:hover {
+            background: #2d8d46;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: clamp(15px, 3vw, 25px) 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .divider span {
+            padding: 0 15px;
+            color: var(--text-secondary);
+            font-size: clamp(12px, 2vw, 14px);
+        }
+
+        .btn-icon {
+            width: clamp(16px, 3vw, 24px);
+            height: clamp(16px, 3vw, 24px);
+            margin-right: 10px;
+        }
+
+        footer {
+            background: rgba(255, 255, 255, 0.9);
+            padding: clamp(15px, 3vw, 25px);
+            text-align: center;
+            box-shadow: 0 -2px 10px var(--shadow-color);
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: clamp(10px, 2vw, 20px);
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: clamp(12px, 2vw, 14px);
+            transition: color 0.3s ease;
+            white-space: nowrap;
+        }
+
+        footer a:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
+        }
+
+        /* Extra Small Devices (phones) */
+        @media only screen and (max-width: 480px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .footer-nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Small Devices (tablets) */
+        @media only screen and (min-width: 481px) and (max-width: 768px) {
+            .container {
+                margin: 15px;
+                padding: 25px;
+            }
+        }
+
+        /* Medium Devices (laptops) */
+        @media only screen and (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 30px;
+            }
+        }
+
+        /* Large Devices (large laptops and desktops) */
+        @media only screen and (min-width: 1025px) {
+            .container {
+                padding: 40px;
+            }
+        }
+
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-gradient: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+                --text-primary: #ffffff;
+                --text-secondary: #d1d5db;
+            }
+
+            .container {
+                background: #374151;
+            } 
+
+            footer {
+                background: rgba(55, 65, 81, 0.9);
+            }
+
+            .divider::before,
+            .divider::after {
+                border-bottom-color: #4b5563;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="container">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='icons/icon1.JPG') }}" alt="Company Logo" class="company-logo">
+                <h2>Welcome to Portal</h2>
+            </div>
+            
+            <div class="login-options">
+                <a href="{{ url_for('client_login') }}" class="login-btn client-btn">
+                    <img src="{{ url_for('static', filename='icons/googe.png') }}" alt="Client Icon" class="btn-icon">
+                    Continue With Google Account
+                </a>
+                
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+                
+                <a href="{{ url_for('admin_login') }}" class="login-btn admin-btn">
+                    <img src="{{ url_for('static', filename='icons/icon1.JPG') }}" alt="Admin Icon" class="btn-icon">
+                    Sign in as Admin
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <nav class="footer-nav">
+            <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+            <span>|</span>
+            <a href="{{ url_for('terms') }}">Terms of Service</a>
+            <span>|</span>
+            <a href="{{ url_for('help') }}">Help Center</a>
+            <span>|</span>
+            <a href="{{ url_for('contact') }}">Contact Us</a>
+        </nav>
+    </footer>
+</body>
+</html>
