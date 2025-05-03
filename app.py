@@ -74,6 +74,13 @@ REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'http://localhost:5000/oauth
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'adminpass123') # Consider using env var for production
 LEARNERSHIPS_JSON_PATH = 'learnerships.json'
 
+# Make redirect URI dynamic based on environment
+def get_redirect_uri():
+    if os.environ.get('FLASK_ENV') == 'production':
+        return 'https://codecraftco.onrender.com/oauth2callback'
+    return 'http://localhost:5000/oauth2callback'
+
+
 def load_learnerships():
     """
     Load learnerships from JSON file with comprehensive error handling
@@ -352,7 +359,7 @@ def client_login():
     logging.info("Initiating Google OAuth login flow.")
     try:
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=SCOPES)
-        flow.redirect_uri = REDIRECT_URI
+        flow.redirect_uri = get_redirect_uri()
         # 'access_type': 'offline' is crucial to get a refresh token
         # 'prompt': 'consent' ensures the user is shown the consent screen on the first login
         # If the user has already granted permission and 'prompt' is omitted or set to 'select_account',
@@ -378,7 +385,7 @@ def client_login():
 def oauth2callback():
 
     redirect_uri = os.environ.get('OAUTH_REDIRECT_URI', 'http://localhost:5000/oauth2callback')
-    
+
     stored_state = session.get('state')
     returned_state = request.args.get('state')
 
@@ -397,7 +404,7 @@ def oauth2callback():
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
             CLIENT_SECRETS_FILE, scopes=SCOPES, state=returned_state # Use returned_state here
         )
-        flow.redirect_uri = REDIRECT_URI
+        flow.redirect_uri = get_redirect_uri()
         # Exchange authorization code for tokens
         flow.fetch_token(authorization_response=request.url)
         creds = flow.credentials
