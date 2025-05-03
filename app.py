@@ -831,7 +831,7 @@ if __name__ == "__main__":
     # Ensure static/icons directory exists at runtime
     os.makedirs('static/icons', exist_ok=True)
     logging.info("Static/icons directory ensured.")
-
+  
 
     # Run the Flask development server
     
