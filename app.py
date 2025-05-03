@@ -44,7 +44,7 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app = Flask(__name__,
             static_folder='static',  # Specify the static folder
             static_url_path='/static')  # Specify the URL path for static files
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'change_this_secret_key!')
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'b51ab4564ed11a1b9bdb9081a2e13ecb967bddd08ac0be4460fbbf0caad314a0')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///email_sender.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
