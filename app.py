@@ -68,7 +68,7 @@ SCOPES = [
     'openid',
 ]
 # Make sure this REDIRECT_URI matches the one configured in your Google Cloud Console
-REDIRECT_URI = 'http://localhost:5000/oauth2callback'
+REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'http://localhost:5000/oauth2callback')
 
 # Admin credentials
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'adminpass123') # Consider using env var for production
@@ -376,6 +376,9 @@ def client_login():
 
 @app.route('/oauth2callback')
 def oauth2callback():
+
+    redirect_uri = os.environ.get('OAUTH_REDIRECT_URI', 'http://localhost:5000/oauth2callback')
+    
     stored_state = session.get('state')
     returned_state = request.args.get('state')
 
