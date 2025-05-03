@@ -34,6 +34,8 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
 
+import secrets
+print(secrets.token_hex(32))
 # Allow OAuthlib to use HTTP localhost (development only)
 # IMPORTANT: Remove or set to '0' in production environments!
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -832,5 +834,10 @@ if __name__ == "__main__":
 
 
     # Run the Flask development server
+    
     # In production, use a production-ready server like Gunicorn/Waitress
-    app.run(debug=True) # Set debug=False for production
+    if os.environ.get('FLASK_ENV') == 'production':
+        app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))
+    else:
+        app.run(debug=True)
+
