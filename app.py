@@ -383,11 +383,19 @@ def client_login():
 
 @app.route('/oauth2callback')
 def oauth2callback():
+    # Log request details for debugging
+    logging.info(f"OAuth callback received. URL: {request.url}")
+    logging.info(f"Request headers: {dict(request.headers)}")
+    logging.info(f"Environment: {os.environ.get('FLASK_ENV', 'development')}")
+
     stored_state = session.get('state')
     returned_state = request.args.get('state')
 
+    logging.info(f"Stored state: {stored_state}")
+    logging.info(f"Returned state: {returned_state}")
+
     if not stored_state or stored_state != returned_state:
-        logging.error("Invalid or missing state parameter in OAuth callback.")
+        logging.error("State mismatch or missing")
         flash("Invalid state parameter. Please try again.", "danger")
         session.pop('state', None)
         return redirect(url_for('client_login'))
@@ -400,82 +408,88 @@ def oauth2callback():
             scopes=SCOPES,
             state=returned_state
         )
-        
-        # Use the environment-specific redirect URI
+
+        # Set redirect URI based on environment
         if os.environ.get('FLASK_ENV') == 'production':
-            flow.redirect_uri = 'https://codecraftco.onrender.com/oauth2callback'
+            redirect_uri = 'https://codecraftco.onrender.com/oauth2callback'
         else:
-            flow.redirect_uri = 'http://localhost:5000/oauth2callback'
+            redirect_uri = 'http://localhost:5000/oauth2callback'
+        
+        flow.redirect_uri = redirect_uri
+        logging.info(f"Using redirect URI: {redirect_uri}")
 
-        # Get the full URL including the scheme
-        if request.url.startswith('http://') and os.environ.get('FLASK_ENV') == 'production':
-            authorization_response = request.url.replace('http://', 'https://', 1)
-        else:
-            authorization_response = request.url
+        # Handle the authorization response
+        authorization_response = request.url
+        if request.headers.get('X-Forwarded-Proto') == 'https':
+            authorization_response = request.url.replace('http://', 'https://')
+        
+        logging.info(f"Authorization response URL: {authorization_response}")
 
+        # Fetch the token
         flow.fetch_token(authorization_response=authorization_response)
         creds = flow.credentials
+        logging.info("Successfully obtained credentials")
 
-        # Rest of your existing oauth2callback code...
-
-        # Use the acquired credentials to get user info
+        # Get user info
         oauth2client = googleapiclient.discovery.build("oauth2", "v2", credentials=creds)
         user_info = oauth2client.userinfo().get().execute()
+        logging.info("Successfully retrieved user info")
+
         google_id = user_info.get("id")
         email = user_info.get("email")
-        name = user_info.get("name", "User") # Provide a default name
+        name = user_info.get("name", "User")
 
         if not google_id or not email:
-             logging.error("Could not retrieve Google ID or email from user info.")
-             flash("Could not retrieve user information from Google. Please try again.", "danger")
-             return redirect(url_for('client_login'))
+            logging.error("Missing user info fields")
+            flash("Could not retrieve user information.", "danger")
+            return redirect(url_for('client_login'))
 
-        # Check if client already exists in our database
+        # Check existing client
         client = Client.query.filter_by(google_id=google_id).first()
-
-        # Prepare token data to be stored/updated
+        
+        # Prepare token data
         token_data = {
             'token': creds.token,
-            'refresh_token': creds.refresh_token, # This is the key for long-term access
+            'refresh_token': creds.refresh_token,
             'token_uri': creds.token_uri,
             'client_id': creds.client_id,
             'client_secret': creds.client_secret,
-            'scopes': " ".join(creds.scopes) if creds.scopes else None # Store scopes as a space-separated string
+            'scopes': " ".join(creds.scopes) if creds.scopes else None
         }
 
         if client:
-            # Update existing client's credentials
-            logging.info(f"Updating existing client {client.id} ({email}).")
+            logging.info(f"Updating existing client: {client.id}")
             for key, value in token_data.items():
-                # Only update refresh token if a new one was provided
-                # Google doesn't always return a refresh token after the first time
                 if key == 'refresh_token' and value is None:
-                    continue # Keep the old refresh token if no new one is given
+                    continue
                 setattr(client, key, value)
-            client.email = email # Email might theoretically change, although unlikely for Google ID
+            client.email = email
             client.name = name
         else:
-            # Create a new client record
-            logging.info(f"Creating new client record for {email}.")
+            logging.info(f"Creating new client for: {email}")
             client = Client(
                 google_id=google_id,
                 email=email,
                 name=name,
-                **token_data # Unpack the token data dictionary
+                **token_data
             )
             db.session.add(client)
 
         db.session.commit()
+        logging.info(f"Database updated for client: {client.id}")
 
-        # Establish the user session in Flask
+        # Set session
         session['client_id'] = client.id
-        # Set the session to permanent so it persists across browser restarts
         session.permanent = True
+        logging.info(f"Session established for client: {client.id}")
 
         flash(f"Welcome, {name}! You are now logged in.", "success")
-        logging.info(f"Client {client.id} ({email}) logged in successfully via OAuth.")
         return redirect(url_for('submit_batch'))
 
+    except Exception as e:
+        logging.error(f"Error in oauth2callback: {str(e)}", exc_info=True)
+        flash("An error occurred during login. Please try again.", "danger")
+        return redirect(url_for('client_login'))
     except googleapiclient.errors.FlowExchangeError as e:
          logging.error(f"OAuth token exchange failed: {e}")
          flash("Failed to get login tokens from Google. Please try again.", "danger")
