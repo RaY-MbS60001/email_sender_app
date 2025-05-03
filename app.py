@@ -383,31 +383,40 @@ def client_login():
 
 @app.route('/oauth2callback')
 def oauth2callback():
-
-    redirect_uri = os.environ.get('OAUTH_REDIRECT_URI', 'http://localhost:5000/oauth2callback')
-
     stored_state = session.get('state')
     returned_state = request.args.get('state')
 
-    # State token validation for security
     if not stored_state or stored_state != returned_state:
         logging.error("Invalid or missing state parameter in OAuth callback.")
-        flash("Invalid or missing state parameter. Please try to login again.", "danger")
-        # Clear potential half-finished session data
+        flash("Invalid state parameter. Please try again.", "danger")
         session.pop('state', None)
-        return redirect(url_for('client_login')) # Redirect back to the login initiation
+        return redirect(url_for('client_login'))
 
-    # Ensure 'state' is removed from session after validation
     session.pop('state', None)
 
     try:
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-            CLIENT_SECRETS_FILE, scopes=SCOPES, state=returned_state # Use returned_state here
+            CLIENT_SECRETS_FILE,
+            scopes=SCOPES,
+            state=returned_state
         )
-        flow.redirect_uri = get_redirect_uri()
-        # Exchange authorization code for tokens
-        flow.fetch_token(authorization_response=request.url)
+        
+        # Use the environment-specific redirect URI
+        if os.environ.get('FLASK_ENV') == 'production':
+            flow.redirect_uri = 'https://codecraftco.onrender.com/oauth2callback'
+        else:
+            flow.redirect_uri = 'http://localhost:5000/oauth2callback'
+
+        # Get the full URL including the scheme
+        if request.url.startswith('http://') and os.environ.get('FLASK_ENV') == 'production':
+            authorization_response = request.url.replace('http://', 'https://', 1)
+        else:
+            authorization_response = request.url
+
+        flow.fetch_token(authorization_response=authorization_response)
         creds = flow.credentials
+
+        # Rest of your existing oauth2callback code...
 
         # Use the acquired credentials to get user info
         oauth2client = googleapiclient.discovery.build("oauth2", "v2", credentials=creds)
