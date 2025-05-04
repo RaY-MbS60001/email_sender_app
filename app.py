@@ -29,6 +29,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(leve
 # Use the root logger or get a specific logger instance
 # logger = logging.getLogger(__name__) # Optional: get a specific logger
 
+from sqlalchemy import desc # Import desc for ordering
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -582,7 +583,6 @@ def admin_batch_detail(batch_id):
     # For GET request, render the detail page
     return render_template('admin_batch_detail.html', batch=batch)
 
-from sqlalchemy import desc # Import desc for ordering
 
 @app.route('/submit', methods=['GET', 'POST'])
 def submit_batch():
