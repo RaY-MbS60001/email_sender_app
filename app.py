@@ -387,7 +387,7 @@ def oauth2callback():
     # Log request details for debugging
     logging.info(f"OAuth callback received. URL: {request.url}")
     logging.info(f"Request headers: {dict(request.headers)}")
-    logging.info(f"Environment: {os.environ.get('FLASK_ENV', 'development')}")
+    logging.info(f"Environment: {os.environ.get('FLASK_ENV', 'production')}")
 
     stored_state = session.get('state')
     returned_state = request.args.get('state')
