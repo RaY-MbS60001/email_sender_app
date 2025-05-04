@@ -69,7 +69,7 @@ SCOPES = [
     'openid',
 ]
 # Make sure this REDIRECT_URI matches the one configured in your Google Cloud Console
-REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'http://localhost:5000/oauth2callback')
+REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'https://codecraftco.onrender.com/oauth2callback')
 
 # Admin credentials
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'adminpass123') # Consider using env var for production
