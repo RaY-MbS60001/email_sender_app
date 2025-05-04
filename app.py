@@ -69,7 +69,7 @@ SCOPES = [
     'openid',
 ]
 # Make sure this REDIRECT_URI matches the one configured in your Google Cloud Console
-REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'https://codecraftco.onrender.com')
+REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'http://codecraftco.onrender.com/oauth2callback')
 
 # Admin credentials
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'adminpass123') # Consider using env var for production
@@ -78,7 +78,7 @@ LEARNERSHIPS_JSON_PATH = 'learnerships.json'
 # Make redirect URI dynamic based on environment
 def get_redirect_uri():
     if os.environ.get('FLASK_ENV') == 'production':
-        return 'https://codecraftco.onrender.com'
+        return 'http://codecraftco.onrender.com/oauth2callback'
     return 'http://localhost:5000/oauth2callback'
 
 
@@ -387,7 +387,7 @@ def oauth2callback():
     # Log request details for debugging
     logging.info(f"OAuth callback received. URL: {request.url}")
     logging.info(f"Request headers: {dict(request.headers)}")
-    logging.info(f"Environment: {os.environ.get('FLASK_ENV', 'production')}")
+    logging.info(f"Environment: {os.environ.get('FLASK_ENV', 'prouction')}")
 
     stored_state = session.get('state')
     returned_state = request.args.get('state')
