@@ -53,6 +53,26 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # This requires session.permanent = True to be set for a specific session
 app.permanent_session_lifetime = timedelta(days=31)
 
+flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('credentials.json',
+    scopes=['https://www.googleapis.com/auth/drive.metadata.readonly',
+            'https://www.googleapis.com/auth/calendar.readonly'])
+
+flow.redirect_uri = 'https://codecraftco.onrender.com/oauth2callback'
+
+# Generate URL for request to Google's OAuth 2.0 server.
+# Use kwargs to set optional request parameters.
+authorization_url, state = flow.authorization_url(
+    # Recommended, enable offline access so that you can refresh an access token without
+    # re-prompting the user for permission. Recommended for web server apps.
+    access_type='offline',
+    # Optional, enable incremental authorization. Recommended as a best practice.
+    include_granted_scopes='true',
+    # Optional, if your application knows which user is trying to authenticate, it can use this
+    # parameter to provide a hint to the Google Authentication Server.
+    login_hint='hint@example.com',
+    # Optional, set prompt to 'consent' will prompt the user for consent
+    prompt='consent')
+
 
 UPLOAD_FOLDER = 'uploaded_cvs'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -69,7 +89,7 @@ SCOPES = [
     'openid',
 ]
 # Make sure this REDIRECT_URI matches the one configured in your Google Cloud Console
-REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'http://codecraftco.onrender.com/oauth2callback')
+REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'https://codecraftco.onrender.com/oauth2callback')
 
 # Admin credentials
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'adminpass123') # Consider using env var for production
@@ -873,4 +893,3 @@ if __name__ == "__main__":
         app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))
     else:
         app.run()
-
