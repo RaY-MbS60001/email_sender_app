@@ -57,7 +57,7 @@ flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('credentials.json
     scopes=['https://www.googleapis.com/auth/drive.metadata.readonly',
             'https://www.googleapis.com/auth/calendar.readonly'])
 
-flow.redirect_uri = 'https://email-sender-app-0adi.onrender.com/oauth2callback'
+flow.redirect_uri = 'https://codecraftco.onrender.com/oauth2callback'
 
 # Generate URL for request to Google's OAuth 2.0 server.
 # Use kwargs to set optional request parameters.
@@ -89,7 +89,7 @@ SCOPES = [
     'openid',
 ]
 # Make sure this REDIRECT_URI matches the one configured in your Google Cloud Console
-REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'https://email-sender-app-0adi.onrender.com/oauth2callback')
+REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'https://codecraftco.onrender.com/oauth2callback')
 
 # Admin credentials
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'adminpass123') # Consider using env var for production
@@ -98,7 +98,7 @@ LEARNERSHIPS_JSON_PATH = 'learnerships.json'
 # Make redirect URI dynamic based on environment
 def get_redirect_uri():
     if os.environ.get('FLASK_ENV') == 'production':
-        return 'https://email-sender-app-0adi.onrender.com/oauth2callback'
+        return 'https://codecraftco.onrender.com/oauth2callback'
     return 'http://localhost:5000/oauth2callback'
 
 
@@ -432,7 +432,7 @@ def oauth2callback():
 
         # Set redirect URI based on environment
         if os.environ.get('FLASK_ENV') == 'production':
-            redirect_uri = 'https://email-sender-app-0adi.onrender.com/oauth2callback'
+            redirect_uri = 'https://codecraftco.onrender.com/oauth2callback'
         else:
             redirect_uri = 'http://localhost:5000/oauth2callback'
         
