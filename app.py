@@ -802,7 +802,7 @@ def submit_batch():
 @app.route('/debug/learnerships')
 def debug_learnerships():
     """Helper route to view loaded learnership data."""
-    learnerships, categories = load_learnerships()
+    learnerships, categories = load_learnerships() 
     return jsonify({
         "learnerships_count": len(learnerships),
         "categories_count": len(categories),
