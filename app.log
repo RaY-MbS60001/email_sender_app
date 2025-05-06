@@ -783,3 +783,98 @@ Traceback (most recent call last):
     raise NotFound() from None
 werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
 2025-05-04 22:05:16,489  INFO      werkzeug — 10.245.130.186 - - [04/May/2025 22:05:16] "[35m[1mGET /rootDesc.xml HTTP/1.1[0m" 500 -
+2025-05-06 14:43:44,416  INFO      werkzeug — [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.43.203:5000
+2025-05-06 14:43:44,418  INFO      werkzeug — [33mPress CTRL+C to quit[0m
+2025-05-06 14:43:44,425  INFO      werkzeug —  * Restarting with stat
+2025-05-06 14:43:46,936  WARNING   werkzeug —  * Debugger is active!
+2025-05-06 14:43:46,954  INFO      werkzeug —  * Debugger PIN: 543-716-034
+2025-05-06 14:44:12,168  ERROR     __main__ — Unhandled exception: Could not build url for endpoint 'help'. Did you mean 'help_page' instead?
+Traceback (most recent call last):
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\app.py", line 368, in index
+    return render_template("index.html")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\templates\index.html", line 257, in top-level template code
+    <a href="{{ url_for('help') }}">Help Center</a>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 2034, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 2023, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\werkzeug\routing\map.py", line 917, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'help'. Did you mean 'help_page' instead?
+2025-05-06 14:44:12,339  INFO      werkzeug — 127.0.0.1 - - [06/May/2025 14:44:12] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-05-06 14:58:16,880  ERROR     __main__ — Unhandled exception: Could not build url for endpoint 'help'. Did you mean 'help_page' instead?
+Traceback (most recent call last):
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\app.py", line 368, in index
+    return render_template("index.html")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\templates\index.html", line 257, in top-level template code
+    <a href="{{ url_for('help') }}">Help Center</a>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 2034, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 2023, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\werkzeug\routing\map.py", line 917, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'help'. Did you mean 'help_page' instead?
+2025-05-06 14:58:16,911  INFO      werkzeug — 192.168.43.203 - - [06/May/2025 14:58:16] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-05-06 14:58:17,458  ERROR     __main__ — Unhandled exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 1788, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\app.py", line 1770, in raise_routing_exception
+    raise request.routing_exception  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\flask\ctx.py", line 351, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sbongakonke Sfiso\OneDrive - University of KwaZulu-Natal\Desktop\3D Objects\email_sender_app\venv\Lib\site-packages\werkzeug\routing\map.py", line 624, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-05-06 14:58:17,502  INFO      werkzeug — 192.168.43.203 - - [06/May/2025 14:58:17] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-05-06 14:59:02,824  INFO      werkzeug —  * Detected change in 'C:\\Users\\Sbongakonke Sfiso\\OneDrive - University of KwaZulu-Natal\\Desktop\\3D Objects\\email_sender_app\\app.py', reloading
+2025-05-06 14:59:03,354  INFO      werkzeug —  * Restarting with stat
