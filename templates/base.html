@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}{% endblock %}</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<!-- ── Design Tokens (dark dashboard palette) ───────────────── -->
+<style>
+:root{
+    /* backgrounds & surfaces */
+    --clr-bg:#0f172a;          /* page background               */
+    --clr-bg-alt:#1e2531;      /* sidebar / table row           */
+    --clr-bg-alt-2:#222b38;    /* table head / <pre>            */
+
+    /* text */
+    --clr-txt:#e2e8f0;
+    --clr-txt-dim:#94a3b8;
+
+    /* borders / separators */
+    --clr-border:#1a2130;
+
+    /* status chips (same as dashboard) */
+    --clr-sending:#facc15;
+    --clr-completed:#14b8a6;
+    --clr-rejected:#ef4444;
+
+    --radius:.55rem;
+    --gap:1rem;
+    --font:"Inter",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+    font-family:var(--font);
+    color:var(--clr-txt);
+    background:var(--clr-bg);
+}
+
+/* ── two-pane grid shell ─────────────────────────────────────── */
+.grid-shell{
+    display:grid;
+    grid-template-columns:320px 1fr;
+    min-height:100vh;
+}
+@media(max-width:780px){
+    .grid-shell{grid-template-columns:1fr;}
+    aside{position:fixed;z-index:40;top:0;left:0;bottom:0;
+          width:280px;transform:translateX(-100%);transition:.35s;}
+    aside.open{transform:translateX(0);}
+    .hamburger{display:block}
+}
+
+/* ── sidebar ─────────────────────────────────────────────────── */
+aside{
+    background:var(--clr-bg-alt);
+    padding:2rem;
+    overflow-y:auto;
+    box-shadow:inset -1px 0 0 var(--clr-border),
+               0 4px 8px rgba(0,0,0,.35);
+}
+.meta-block{margin-bottom:var(--gap);}
+.meta-block small{
+    color:var(--clr-txt-dim);
+    text-transform:uppercase;font-size:.7rem;letter-spacing:.03em;
+}
+.hr{height:1px;background:var(--clr-border);margin:var(--gap) 0;}
+.badge{
+    padding:.18rem .65rem;border-radius:999px;
+    font-size:.75rem;font-weight:600;display:inline-block;
+}
+.badge.sending   {background:var(--clr-sending);color:#000}
+.badge.completed {background:var(--clr-completed);color:#000}
+.badge.rejected  {background:var(--clr-rejected); color:#fff}
+
+/* ── main content ────────────────────────────────────────────── */
+main{
+    padding:2rem;overflow-x:hidden;
+}
+pre.email{
+    white-space:pre-wrap;
+    background:var(--clr-bg-alt-2);
+    padding:1rem;border-radius:var(--radius);
+    border:1px solid var(--clr-border);
+    color:var(--clr-txt);
+}
+table{
+    width:100%;border-collapse:collapse;font-size:.9rem;
+    color:var(--clr-txt);
+}
+th,td{padding:.55rem .7rem;text-align:left;border-bottom:1px solid var(--clr-border);}
+th{background:var(--clr-bg-alt-2);font-weight:600;}
+a.btn{
+    display:inline-block;padding:.55rem 1.2rem;
+    border:1px solid var(--clr-txt-dim);
+    border-radius:var(--radius);text-decoration:none;
+    color:var(--clr-txt);margin-top:var(--gap);
+}
+a.btn:hover{border-color:var(--clr-txt);}
+.btn-approve{background:var(--clr-completed);color:#000;border:none}
+.btn-reject {background:var(--clr-rejected); color:#fff;border:none}
+
+/* hamburger icon */
+.ham-line{width:22px;height:2px;background:var(--clr-txt);margin:5px 0;border-radius:1px;}
+.hamburger{display:none;position:fixed;top:1rem;left:1rem;background:none;border:none;}
+</style>
+
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<button class="hamburger" onclick="document.querySelector('aside').classList.toggle('open')">
+  <span class="ham-line"></span><span class="ham-line"></span><span class="ham-line"></span>
+</button>
+
+<div class="grid-shell">
+    {% block body %}{% endblock %}
+</div>
+</body>
+</html>

@@ -18,6 +18,7 @@ from flask import (
     jsonify
 )
 from flask_sqlalchemy import SQLAlchemy
+
 from werkzeug.utils import secure_filename
 
 import google.oauth2.credentials
@@ -42,12 +43,13 @@ print(secrets.token_hex(32))
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # App configuration
-app = Flask(__name__,
-            static_folder='static',  # Specify the static folder
-            static_url_path='/static')  # Specify the URL path for static files
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'b51ab4564ed11a1b9bdb9081a2e13ecb967bddd08ac0be4460fbbf0caad314a0')
+app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')  # Secure in production
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///email_sender.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.permanent_session_lifetime = timedelta(days=31)
+
+db = SQLAlchemy(app)
 
 # Configure permanent session lifetime (e.g., 31 days)
 # This requires session.permanent = True to be set for a specific session
@@ -78,8 +80,6 @@ UPLOAD_FOLDER = 'uploaded_cvs'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-db = SQLAlchemy(app)
-
 # Google OAuth Config
 CLIENT_SECRETS_FILE = "credentials.json"
 SCOPES = [
@@ -101,6 +101,13 @@ def get_redirect_uri():
         return 'https://codecraftco.onrender.com/oauth2callback'
     return 'http://localhost:5000/oauth2callback'
 
+@app.route('/uploaded_cvs/<path:filename>')
+def uploaded_file(filename):
+    try:
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    except Exception as e:
+        logging.error(f"Error serving uploaded file {filename}: {e}")
+        return 'File not found', 404
 
 def load_learnerships():
     """
@@ -155,18 +162,12 @@ def load_learnerships():
         return [], []
 
 
-# Models
+# Models (example setup - adjust based on your needs)
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     google_id = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(255))
-    token = db.Column(db.Text, nullable=False) # Google access token
-    refresh_token = db.Column(db.Text, nullable=True) # Google refresh token
-    token_uri = db.Column(db.Text, nullable=True) # Google token URI
-    client_id = db.Column(db.Text, nullable=True) # Your Google OAuth client ID
-    client_secret = db.Column(db.Text, nullable=True) # Your Google OAuth client secret
-    scopes = db.Column(db.Text, nullable=True) # Scopes granted by the user
     batches = db.relationship('Batch', backref='client')
 
 class Batch(db.Model):
@@ -174,8 +175,7 @@ class Batch(db.Model):
     client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
     subject = db.Column(db.String(255), nullable=False)
     body = db.Column(db.Text, nullable=False)
-    cv_filename = db.Column(db.String(255))
-    status = db.Column(db.String(20), default='pending') # e.g., 'pending', 'approved', 'rejected', 'sending', 'completed'
+    status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     sent_at = db.Column(db.DateTime, nullable=True)
     emails = db.relationship('BatchEmail', backref='batch', cascade='all, delete-orphan')
@@ -184,16 +184,25 @@ class BatchEmail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     batch_id = db.Column(db.Integer, db.ForeignKey('batch.id'), nullable=False)
     recipient_email = db.Column(db.String(255), nullable=False)
-    status = db.Column(db.String(20), default='pending') # e.g., 'pending', 'sent', 'failed'
-    error = db.Column(db.Text) # Store error message if sending failed
+    status = db.Column(db.String(20), default='pending')
+    error = db.Column(db.Text)
 
+class EmailResponse(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
+    sender = db.Column(db.String(255), nullable=False)
+    subject = db.Column(db.String(255), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    received_at = db.Column(db.DateTime, default=datetime.utcnow)
 # Utility Functions
 def is_valid_email(email):
     """Basic email format validation"""
     return re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email.strip()) is not None
 
 def create_message_with_attachment(to_email, subject, body, attachment_path=None):
-    """Creates a MIME message suitable for Gmail API, including an attachment"""
+    """
+    Creates MIME message suitable for Gmail API, including an attachment
+    """
     message = MIMEMultipart()
     message['to'] = to_email
     message['subject'] = subject
@@ -201,37 +210,39 @@ def create_message_with_attachment(to_email, subject, body, attachment_path=None
 
     if attachment_path and os.path.exists(attachment_path):
         filename = os.path.basename(attachment_path)
-        try:
-            with open(attachment_path, 'rb') as f:
-                part = MIMEBase('application', 'octet-stream')
-                part.set_payload(f.read())
-            encoders.encode_base64(part)
-            part.add_header('Content-Disposition', f'attachment; filename="{filename}"')
-            message.attach(part)
-        except FileNotFoundError:
-            logging.error(f"Attachment file not found: {attachment_path}")
-        except Exception as e:
-             logging.error(f"Error attaching file {attachment_path}: {e}")
-
+        with open(attachment_path, 'rb') as f:
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(f.read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', f'attachment; filename="{filename}"')
+        message.attach(part)
 
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
     return {'raw': raw_message}
 
+
 def send_email_gmail_api(creds, to_email, subject, body, attachment_path=None):
-    """Sends an email using the Gmail API with given credentials"""
+    """
+    Sends an email using the Gmail API with given credentials
+    """
     try:
+        print(f"Building Gmail service for email: {to_email}")
         service = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
+        
+        print(f"Creating message for: {to_email}")
         message = create_message_with_attachment(to_email, subject, body, attachment_path)
-        # Note: The 'me' user ID refers to the authenticated user.
+        
+        print(f"Sending email to: {to_email}")
         sent_message = service.users().messages().send(userId='me', body=message).execute()
-        logging.info(f"Message sent successfully to {to_email}. Message Id: {sent_message['id']}")
-        return True # Indicate success
+        
+        print(f"Message sent successfully to {to_email}. Message Id: {sent_message['id']}")
+        return True
     except googleapiclient.errors.HttpError as error:
-        logging.error(f'An API error occurred: {error}')
-        return False, str(error) # Indicate failure and return error message
+        print(f'An API error occurred: {error}')
+        return False, str(error)
     except Exception as e:
-        logging.error(f'An unexpected error occurred while sending email to {to_email}: {e}')
-        return False, str(e) # Indicate failure and return error message
+        print(f'An unexpected error occurred while sending email to {to_email}: {e}')
+        return False, str(e)
 
 
 def admin_required(f):
@@ -246,22 +257,21 @@ def admin_required(f):
     return decorated_function
 
 def send_batch_emails_async(batch_id):
-    """Background task to send emails for a batch after admin approval."""
-    # Need app_context for SQLAlchemy and configuration access
+    """
+    Background task to send emails for a batch after admin approval
+    """
     with app.app_context():
         batch = Batch.query.get(batch_id)
         if not batch or batch.status != 'approved':
             logging.warning(f"Batch {batch_id} not found or not approved for sending.")
             return
 
-        # Prevent double-sending if task is somehow triggered twice
         if batch.status == 'sending':
-             logging.info(f"Batch {batch.id} already in sending status.")
-             return
+            logging.info(f"Batch {batch.id} already in sending status.")
+            return
 
         batch.status = 'sending'
-        # Optionally, update sent_at now or per email
-        db.session.commit() # Commit status change
+        db.session.commit()
 
         client = batch.client
         if not client:
@@ -271,46 +281,35 @@ def send_batch_emails_async(batch_id):
             return
 
         try:
-            # Create credentials object from stored data
             creds = google.oauth2.credentials.Credentials(
                 token=client.token,
                 refresh_token=client.refresh_token,
                 token_uri=client.token_uri,
                 client_id=client.client_id,
                 client_secret=client.client_secret,
-                scopes=client.scopes.split() # Ensure scopes are a list
+                scopes=client.scopes.split()
             )
-
-            # The credentials object will automatically handle token refresh if needed
-            # when making API calls, using the stored refresh_token.
-            # You might add logic here to explicitly refresh if creds.expired and creds.refresh_token is present,
-            # and save the new token, but the google-auth library often handles this implicitly
-            # during API execution if you pass the creds object.
-
+            print(f"Credentials created for client {client.id}")
         except Exception as e:
-             logging.error(f"Failed to create credentials for client {client.id} (Batch {batch.id}): {e}")
-             batch.status = 'failed'
-             batch.error = f"Credential error: {e}"
-             db.session.commit()
-             return
+            logging.error(f"Failed to create credentials for client {client.id} (Batch {batch.id}): {e}")
+            batch.status = 'failed'
+            batch.error = f"Credential error: {e}"
+            db.session.commit()
+            return
 
         cv_path = os.path.join(app.config['UPLOAD_FOLDER'], batch.cv_filename) if batch.cv_filename else None
         if cv_path and not os.path.exists(cv_path):
-             logging.warning(f"CV file not found for batch {batch.id}: {cv_path}")
-             # Decide how to handle missing CV: skip batch, mark failed?
-             # For now, log warning and continue without attachment for this batch.
-             cv_path = None # Treat as no attachment
-
+            print(f"CV file not found for batch {batch.id}: {cv_path}")
+            cv_path = None
 
         success_count = 0
         failed_count = 0
-        # Iterate through emails associated with this batch
+
         for email_entry in batch.emails:
             if email_entry.status in ('sent', 'failed'):
-                 logging.info(f"Skipping email {email_entry.id} to {email_entry.recipient_email} in batch {batch.id} (already processed).")
-                 continue # Skip if already sent or failed in a previous attempt (shouldn't happen in single run, but good for robustness)
+                continue
 
-            logging.info(f"Attempting to send email to {email_entry.recipient_email} for batch {batch.id}")
+            print(f"Attempting to send email to {email_entry.recipient_email} for batch {batch.id}")
             send_success, error_message = send_email_gmail_api(
                 creds,
                 to_email=email_entry.recipient_email,
@@ -322,23 +321,23 @@ def send_batch_emails_async(batch_id):
             if send_success:
                 email_entry.status = 'sent'
                 success_count += 1
-                logging.info(f"Successfully sent email to {email_entry.recipient_email}")
+                print(f"Successfully sent email to {email_entry.recipient_email}")
             else:
                 email_entry.status = 'failed'
-                email_entry.error = error_message if error_message else "Unknown error"
+                email_entry.error = error_message or "Unknown error"
                 failed_count += 1
-                logging.error(f"Failed to send email to {email_entry.recipient_email}: {error_message}")
+                print(f"Failed to send email to {email_entry.recipient_email}: {error_message}")
 
-            # Commit frequently in a long-running task to save progress
             db.session.commit()
 
-        # Update batch status once all emails are processed
         batch.status = 'completed'
         batch.sent_at = datetime.utcnow()
         db.session.commit()
 
-        logging.info(f"Batch {batch.id} sending completed: {success_count} success, {failed_count} failed.")
+        print(f"Batch {batch.id} sending completed: {success_count} success, {failed_count} failed.")
 
+def is_valid_email(email):
+    return re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email.strip()) is not None
 
 # Static Page Routes
 @app.route('/privacy')
@@ -360,68 +359,87 @@ def contact():
 # Routes
 @app.route('/')
 def index():
-    # Check if the client is already logged in via session
     if 'client_id' in session:
-        logging.info(f"Client ID {session['client_id']} found in session. Redirecting to submit.")
-        # If session is permanent, this check will persist login across browser restarts
         return redirect(url_for('submit_batch'))
-
-    logging.info("No client ID in session. Rendering index page.")
     return render_template('index.html')
 
 @app.route('/client/login')
 def client_login():
-    # Check if the client is already logged in before starting OAuth flow
     if 'client_id' in session:
-         logging.info(f"Client ID {session['client_id']} already in session. Redirecting to submit.")
-         flash("You are already logged in.", "info")
-         return redirect(url_for('submit_batch'))
+        return redirect(url_for('submit_batch'))
 
-    logging.info("Initiating Google OAuth login flow.")
     try:
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=SCOPES)
         flow.redirect_uri = get_redirect_uri()
-        # 'access_type': 'offline' is crucial to get a refresh token
-        # 'prompt': 'consent' ensures the user is shown the consent screen on the first login
-        # If the user has already granted permission and 'prompt' is omitted or set to 'select_account',
-        # Google might skip the consent screen.
         authorization_url, state = flow.authorization_url(
-            access_type='offline', # Request refresh token
-            include_granted_scopes='true', # Include all previously granted scopes
-            prompt='consent' # Forces consent screen, can remove 'prompt' after initial testing
+            access_type='offline',
+            include_granted_scopes='true',
+            prompt='consent'
         )
-        session['state'] = state
+        session['oauth_state'] = state
+        print("Redirecting to Google for authorization...")
         return redirect(authorization_url)
-    except FileNotFoundError:
-        logging.error(f"Client secrets file not found at {CLIENT_SECRETS_FILE}")
-        flash("Configuration error: Google credentials not found.", "danger")
-        return redirect(url_for('index'))
     except Exception as e:
         logging.error(f"Error initiating OAuth flow: {e}")
         flash("An error occurred initiating login. Please try again.", "danger")
         return redirect(url_for('index'))
+    
+
+@app.route('/client/menu')
+def client_menu():
+    if 'client_id' not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for('index'))
+    return render_template('client_menu.html')
+
+@app.route('/client/applications')
+def client_applications():
+    if 'client_id' not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for('index'))
+    
+    client_id = session['client_id']
+    applications = Batch.query.filter_by(client_id=client_id).order_by(Batch.created_at.desc()).all()
+    return render_template('client_applications.html', applications=applications)
+
+@app.route('/client/send_application')
+def client_send_application():
+    if 'client_id' not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for('index'))
+    
+    return redirect(url_for('submit_batch'))
+
+@app.route('/client/settings')
+def client_settings():
+    if 'client_id' not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for('index'))
+    
+    client = Client.query.get(session['client_id'])
+    return render_template('client_settings.html', client=client)
+
+@app.route('/client/inbox')
+def client_inbox():
+    if 'client_id' not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for('index'))
+
+    client_id = session['client_id']
+    emails = EmailResponse.query.filter_by(client_id=client_id).order_by(EmailResponse.received_at.desc()).all()
+
+    return render_template('client_inbox.html', emails=emails)
 
 
 @app.route('/oauth2callback')
 def oauth2callback():
-    # Log request details for debugging
-    logging.info(f"OAuth callback received. URL: {request.url}")
-    logging.info(f"Request headers: {dict(request.headers)}")
-    logging.info(f"Environment: {os.environ.get('FLASK_ENV', 'prouction')}")
-
-    stored_state = session.get('state')
+    stored_state = session.get('oauth_state')
     returned_state = request.args.get('state')
 
-    logging.info(f"Stored state: {stored_state}")
-    logging.info(f"Returned state: {returned_state}")
-
     if not stored_state or stored_state != returned_state:
-        logging.error("State mismatch or missing")
+        print("State mismatch or missing. Redirecting to login.")
         flash("Invalid state parameter. Please try again.", "danger")
-        session.pop('state', None)
         return redirect(url_for('client_login'))
-
-    session.pop('state', None)
 
     try:
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
@@ -429,46 +447,19 @@ def oauth2callback():
             scopes=SCOPES,
             state=returned_state
         )
-
-        # Set redirect URI based on environment
-        if os.environ.get('FLASK_ENV') == 'production':
-            redirect_uri = 'https://codecraftco.onrender.com/oauth2callback'
-        else:
-            redirect_uri = 'http://localhost:5000/oauth2callback'
-        
-        flow.redirect_uri = redirect_uri
-        logging.info(f"Using redirect URI: {redirect_uri}")
-
-        # Handle the authorization response
+        flow.redirect_uri = get_redirect_uri()
         authorization_response = request.url
-        if request.headers.get('X-Forwarded-Proto') == 'https':
-            authorization_response = request.url.replace('http://', 'https://')
-        
-        logging.info(f"Authorization response URL: {authorization_response}")
-
-        # Fetch the token
         flow.fetch_token(authorization_response=authorization_response)
         creds = flow.credentials
-        logging.info("Successfully obtained credentials")
 
-        # Get user info
         oauth2client = googleapiclient.discovery.build("oauth2", "v2", credentials=creds)
         user_info = oauth2client.userinfo().get().execute()
-        logging.info("Successfully retrieved user info")
 
         google_id = user_info.get("id")
         email = user_info.get("email")
         name = user_info.get("name", "User")
 
-        if not google_id or not email:
-            logging.error("Missing user info fields")
-            flash("Could not retrieve user information.", "danger")
-            return redirect(url_for('client_login'))
-
-        # Check existing client
         client = Client.query.filter_by(google_id=google_id).first()
-        
-        # Prepare token data
         token_data = {
             'token': creds.token,
             'refresh_token': creds.refresh_token,
@@ -479,7 +470,6 @@ def oauth2callback():
         }
 
         if client:
-            logging.info(f"Updating existing client: {client.id}")
             for key, value in token_data.items():
                 if key == 'refresh_token' and value is None:
                     continue
@@ -487,43 +477,21 @@ def oauth2callback():
             client.email = email
             client.name = name
         else:
-            logging.info(f"Creating new client for: {email}")
-            client = Client(
-                google_id=google_id,
-                email=email,
-                name=name,
-                **token_data
-            )
+            client = Client(google_id=google_id, email=email, name=name, **token_data)
             db.session.add(client)
 
         db.session.commit()
-        logging.info(f"Database updated for client: {client.id}")
-
-        # Set session
         session['client_id'] = client.id
         session.permanent = True
-        logging.info(f"Session established for client: {client.id}")
-
         flash(f"Welcome, {name}! You are now logged in.", "success")
-        return redirect(url_for('submit_batch'))
-
+        print(f"User {email} logged in successfully.")
+        return redirect(url_for('client_menu'))
+    
     except Exception as e:
         logging.error(f"Error in oauth2callback: {str(e)}", exc_info=True)
         flash("An error occurred during login. Please try again.", "danger")
-        return redirect(url_for('client_login'))
-    except googleapiclient.errors.FlowExchangeError as e:
-         logging.error(f"OAuth token exchange failed: {e}")
-         flash("Failed to get login tokens from Google. Please try again.", "danger")
-         return redirect(url_for('client_login'))
-    except FileNotFoundError:
-        logging.error(f"Client secrets file not found during callback: {CLIENT_SECRETS_FILE}")
-        flash("Configuration error during login. Please try again.", "danger")
-        return redirect(url_for('client_login'))
-    except Exception as e:
-        # Catch any other unexpected errors during the process
-        logging.error(f"Unexpected error during OAuth callback: {str(e)}")
-        flash("An error occurred during login. Please try again.", "danger")
-        return redirect(url_for('client_login'))
+    return redirect(url_for('client_login'))
+
 
 
 @app.route('/logout')
@@ -838,6 +806,14 @@ def serve_icon(filename):
         logging.error(f"Error serving icon {filename}: {e}")
         return '', 500 # Internal server error
 
+def initialize_database():
+    try:
+        with app.app_context():
+            db.create_all()
+            logging.info("Database tables checked/created.")
+    except Exception as e:
+        logging.error(f"Error initializing database: {str(e)}", exc_info=True)
+
 
 def create_default_icon():
     """Creates a simple default icon if it doesn't exist."""
@@ -872,24 +848,14 @@ def create_default_icon():
 
 
 # Ensure the default icon is created when the script runs
-create_default_icon()
-
-
-if __name__ == "__main__":
-    # Create database tables if they don't exist
-    with app.app_context():
-        db.create_all()
-        logging.info("Database tables checked/created.")
-
-    # Ensure static/icons directory exists at runtime
-    os.makedirs('static/icons', exist_ok=True)
-    logging.info("Static/icons directory ensured.")
-  
+#create_default_icon()
 
     # Run the Flask development server
     
-    # In production, use a production-ready server like Gunicorn/Waitress
-    if os.environ.get('FLASK_ENV') == 'production':
-        app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))
-    else:
-        app.run()
+if __name__ == "__main__":
+    with app.app_context():
+        initialize_database()
+        db.create_all()
+        logging.info("Database tables checked/created.")
+    
+    app.run(debug=True)

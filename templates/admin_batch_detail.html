@@ -1,43 +1,88 @@
-<!doctype html>
-<html>
-<head><title>Batch Detail #{{ batch.id }}</title></head>
-<body>
-<h2>Batch #{{ batch.id }}</h2>
-<p><strong>Client:</strong> {{ batch.client.name }} ({{ batch.client.email }})</p>
-<p><strong>Status:</strong> {{ batch.status }}</p>
-<p><strong>Subject:</strong> {{ batch.subject }}</p>
-<p><strong>Body:</strong><br>{{ batch.body|replace('\n','<br>')|safe }}</p>
-<p><strong>CV:</strong> <a href="{{ url_for('uploaded_file', filename=batch.cv_filename) }}" target="_blank">Download CV</a></p>
+{% macro badge(status) -%}
+  <span class="badge {{ status|lower }}">{{ status.title() }}</span>
+{%- endmacro %}
 
-<h3>Recipient Emails</h3>
-<table border="1" cellpadding="5" cellspacing="0">
-<tr><th>Email</th><th>Status</th><th>Error</th></tr>
-{% for e in batch.emails %}
-<tr>
-  <td>{{ e.recipient_email }}</td>
-  <td>{{ e.status }}</td>
-  <td>{{ e.error or '' }}</td>
-</tr>
-{% endfor %}
-</table>
+{% extends "base.html" %}
+{% block title %}Batch #{{ batch.id }}{% endblock %}
 
-{% if batch.status == 'pending' %}
-<form method="post">
-  <button name="action" value="approve" type="submit">Approve</button>
-  <button name="action" value="reject" type="submit">Reject</button>
-</form>
-{% else %}
-<a href="{{ url_for('admin_dashboard') }}">Back to Dashboard</a>
-{% endif %}
+{% block body %}
+<!-- ───── SIDEBAR ───── -->
+<aside>
+  <h2 style="margin-bottom:1.5rem;">Batch #{{ batch.id }}</h2>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  <ul>
-  {% for category, message in messages %}
-    <li style="color: {% if category == 'success' %}green{% elif category=='danger' %}red{% else %}black{% endif %}">{{ message }}</li>
-  {% endfor %}
-  </ul>
+  <div class="meta-block">
+     <small>Client</small><br>
+     {{ batch.client.name }}<br>
+     <span style="font-size:.85rem;color:var(--clr-txt-dim)">
+         {{ batch.client.email }}
+     </span>
+  </div>
+
+  <div class="meta-block">
+     <small>Status</small><br>{{ badge(batch.status) }}
+  </div>
+
+  <div class="meta-block">
+     <small>Created</small><br>{{ batch.created_at.strftime('%Y-%m-%d %H:%M') }}
+  </div>
+
+  <div class="meta-block">
+     <small>Sent</small><br>{{ batch.sent_at.strftime('%Y-%m-%d %H:%M') if batch.sent_at else 'N/A' }}
+  </div>
+
+  <div class="hr"></div>
+
+  <div class="meta-block">
+     <small>Subject</small><br>{{ batch.subject }}
+  </div>
+</aside>
+
+<!-- ───── MAIN CONTENT ───── -->
+<main>
+  <h3>Email Body</h3>
+  <pre class="email">{{ batch.body }}</pre>
+
+  {% if batch.cv_filename %}
+  <a class="btn" href="{{ url_for('uploaded_file', filename=batch.cv_filename) }}" target="_blank">
+     📎 Download CV
+  </a>
   {% endif %}
-{% endwith %}
-</body>
-</html>
+
+  <h3 style="margin-top:2rem;">Recipient Emails</h3>
+  <table>
+    <thead>
+      <tr><th>Email</th><th>Status</th><th>Error</th></tr>
+    </thead>
+    <tbody>
+      {% for r in batch.emails %}
+      <tr>
+        <td>{{ r.recipient_email }}</td>
+        <td>{{ badge(r.status) }}</td>
+        <td style="color:var(--clr-rejected);">{{ r.error or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if batch.status == 'pending' %}
+  <form method="post" style="margin-top:2rem;display:flex;gap:1rem;">
+    <button class="btn btn-approve" name="action" value="approve">Approve</button>
+    <button class="btn btn-reject" name="action" value="reject">Reject</button>
+  </form>
+  {% else %}
+  <a href="{{ url_for('admin_dashboard') }}" class="btn">← Back to Dashboard</a>
+  {% endif %}
+
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+      <ul style="margin-top:1rem;list-style:disc;padding-left:1.5rem;">
+        {% for cat, msg in msgs %}
+          <li style="color:{{ 'var(--clr-completed)' if cat == 'success' else 'var(--clr-rejected)' }}">
+            {{ msg }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+</main>
+{% endblock %}

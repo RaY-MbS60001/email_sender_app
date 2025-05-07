@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Applications</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="applications-container">
+        <h1>Your Applications</h1>
+        <ul>
+            {% for application in applications %}
+                <li>
+                    <strong>ID:</strong> {{ application.id }} <br>
+                    <strong>Status:</strong> {{ application.status }} <br>
+                    <strong>Submitted On:</strong> {{ application.created_at }}
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('client_menu') }}">Back to Menu</a>
+    </div>
+</body>
+</html>

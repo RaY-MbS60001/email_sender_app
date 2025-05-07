@@ -1,0 +1,84 @@
+body {
+    background-color: #1c1f24;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.login-container, .menu-container, .applications-container, .settings-container, .inbox-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.login-box {
+    background-color: #2b2e35;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.logo {
+    height: 100px;
+    width: 100px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.login-button {
+    display: block;
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    color: #ffffff;
+    background-color: #4285f4;
+    text-align: center;
+}
+
+.admin {
+    background-color: #34a853;
+}
+
+.divider {
+    margin: 20px 0;
+    font-weight: bold;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    margin: 15px 0;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #4285f4;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
+    background-color: #2b2e35;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}

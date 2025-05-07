@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="menu-container">
+        <h1>Dashboard</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('client_applications') }}">Applications</a></li>
+                <li><a href="{{ url_for('client_send_application') }}">Send Application</a></li>
+                <li><a href="{{ url_for('client_inbox') }}">Inbox</a></li>
+                <li><a href="{{ url_for('client_settings') }}">Settings/Profile</a></li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>

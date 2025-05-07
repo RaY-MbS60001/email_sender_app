@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Inbox</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="inbox-container">
+        <h1>Inbox</h1>
+        <ul>
+            {% for email in emails %}
+                <li>
+                    <strong>From:</strong> {{ email.sender }} <br>
+                    <strong>Subject:</strong> {{ email.subject }} <br>
+                    <strong>Received On:</strong> {{ email.received_at | date('Y-m-d H:i:s') }} <br>
+                    <p>{{ email.body }}</p>
+                </li>
+            {% else %}
+                <li>No emails found.</li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('client_menu') }}">Back to Menu</a>
+    </div>
+</body>
+</html>
