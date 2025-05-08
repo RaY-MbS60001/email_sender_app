@@ -2,15 +2,134 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Settings</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #1a1d21;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .settings-container {
+            background-color: rgba(30, 34, 39, 0.95);
+            border-radius: 12px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .profile-info {
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .label {
+            color: #9ca3af;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .value {
+            color: #ffffff;
+            font-size: 1.1rem;
+            word-break: break-all;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #3b82f6;
+            color: white;
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .settings-container {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .settings-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="settings-container">
         <h1>Your Profile</h1>
-        <p><strong>Name:</strong> {{ client.name }}</p>
-        <p><strong>Email:</strong> {{ client.email }}</p>
-        <a href="{{ url_for('client_menu') }}">Back to Menu</a>
+        <div class="profile-info">
+            <div class="info-item">
+                <span class="label">Name</span>
+                <span class="value">{{ client.name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Email</span>
+                <span class="value">{{ client.email }}</span>
+            </div>
+        </div>
+        <a href="{{ url_for('client_menu') }}" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Back to Menu
+        </a>
     </div>
 </body>
 </html>

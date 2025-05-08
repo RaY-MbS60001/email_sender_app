@@ -2,25 +2,131 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Email Inbox</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><h1><span style="color:#0ea5e9;">📥</span> Inbox</h1></title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1a1d21; /* main background */
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .inbox-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #1d2127; /* container background */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.4);
+        }
+
+        header h1 {
+            color: #ffffff;
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+
+        .email-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .email-item {
+            background-color: #1d2128; /* card background */
+            border-left: 4px solid #373a43;
+            padding: 20px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .email-item:hover {
+            background-color: #1c2026;
+        }
+
+        .email-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .sender {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .date {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .subject {
+            font-size: 1.2rem;
+            color: #e0e6ed;
+            margin: 10px 0;
+        }
+
+        .email-body {
+            color: #c0c6cc;
+        }
+
+        .no-emails {
+            background-color: #1b1f25;
+            color: #95a5a6;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .menu-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #373a43;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-button:hover {
+            background-color: #4b4f5a;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+    </style>
 </head>
 <body>
     <div class="inbox-container">
-        <h1>Inbox</h1>
-        <ul>
-            {% for email in emails %}
-                <li>
-                    <strong>From:</strong> {{ email.sender }} <br>
-                    <strong>Subject:</strong> {{ email.subject }} <br>
-                    <strong>Received On:</strong> {{ email.received_at | date('Y-m-d H:i:s') }} <br>
-                    <p>{{ email.body }}</p>
-                </li>
-            {% else %}
-                <li>No emails found.</li>
-            {% endfor %}
-        </ul>
-        <a href="{{ url_for('client_menu') }}">Back to Menu</a>
+        <header>
+            <h1>Inbox</h1>
+        </header>
+        <main>
+            <div class="email-list">
+                {% for email in emails %}
+                    <article class="email-item">
+                        <div class="email-header">
+                            <span class="sender">{{ email.sender }}</span>
+                            <span class="date">{{ email.received_at }}</span>
+                        </div>
+                        <h2 class="subject">{{ email.subject }}</h2>
+                        <div class="email-body">{{ email.body }}</div>
+                    </article>
+                {% else %}
+                    <p class="no-emails">No emails found.</p>
+                {% endfor %}
+            </div>
+        </main>
+        <footer>
+            <a href="{{ url_for('client_menu') }}" class="menu-button">Back to Menu</a>
+        </footer>
     </div>
 </body>
 </html>

@@ -1,23 +1,191 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Applications</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Applications</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background-color: #0b0b0b; /* Adjusted to match the dashboard */
+            color: #ffffff;
+        }
+
+        .applications-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .applications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .application-card {
+            background: #2c3e50;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .application-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .application-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .id-badge {
+            background: #34495e;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: #ffffff; /* Ensure text visibility */
+        }
+
+        .status-sending {
+            background: #f1c40f;
+        }
+
+        .status-completed {
+            background: #2ecc71;
+        }
+
+        .status-rejected {
+            background: #e74c3c;
+        }
+
+        .application-details {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .menu-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .menu-link:hover {
+            background: #2980b9;
+        }
+
+        @media (max-width: 768px) {
+            .applications-container {
+                padding: 10px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .application-card {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="applications-container">
         <h1>Your Applications</h1>
-        <ul>
-            {% for application in applications %}
-                <li>
-                    <strong>ID:</strong> {{ application.id }} <br>
-                    <strong>Status:</strong> {{ application.status }} <br>
-                    <strong>Submitted On:</strong> {{ application.created_at }}
-                </li>
-            {% endfor %}
-        </ul>
-        <a href="{{ url_for('client_menu') }}">Back to Menu</a>
+        
+        <div class="applications-list">
+            <div class="application-card">
+                <div class="application-header">
+                    <span class="id-badge">ID: 5</span>
+                    <span class="status-badge status-sending">sending</span>
+                </div>
+                <div class="application-details">
+                    Submitted On: 2025-05-02 10:53:10.831135
+                </div>
+            </div>
+
+            <div class="application-card">
+                <div class="application-header">
+                    <span class="id-badge">ID: 4</span>
+                    <span class="status-badge status-completed">completed</span>
+                </div>
+                <div class="application-details">
+                    Submitted On: 2025-05-02 10:16:59.405958
+                </div>
+            </div>
+
+            <div class="application-card">
+                <div class="application-header">
+                    <span class="id-badge">ID: 3</span>
+                    <span class="status-badge status-rejected">rejected</span>
+                </div>
+                <div class="application-details">
+                    Submitted On: 2025-05-02 09:47:14.322975
+                </div>
+            </div>
+
+            <div class="application-card">
+                <div class="application-header">
+                    <span class="id-badge">ID: 2</span>
+                    <span class="status-badge status-rejected">rejected</span>
+                </div>
+                <div class="application-details">
+                    Submitted On: 2025-05-02 09:39:29.374964
+                </div>
+            </div>
+
+            <div class="application-card">
+                <div class="application-header">
+                    <span class="id-badge">ID: 1</span>
+                    <span class="status-badge status-sending">sending</span>
+                </div>
+                <div class="application-details">
+                    Submitted On: 2025-05-02 03:05:05.877829
+                </div>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <a href="menu" class="menu-link">Back to Menu</a>
+        </div>
     </div>
 </body>
 </html>
