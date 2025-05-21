@@ -49,7 +49,22 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///email_sender.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.permanent_session_lifetime = timedelta(days=31)
 
+app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
+
+import logging
+from logging.handlers import RotatingFileHandler
+
+# Configure logging
+handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=1)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+app.logger.addHandler(handler)
+
+# Optional: logging to console as well
+logging.basicConfig(level=logging.DEBUG)
 
 # Configure permanent session lifetime (e.g., 31 days)
 # This requires session.permanent = True to be set for a specific session
@@ -168,6 +183,13 @@ class Client(db.Model):
     google_id = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(255))
+    # Add these OAuth fields
+    token = db.Column(db.String(255))
+    refresh_token = db.Column(db.String(255))
+    token_uri = db.Column(db.String(255))
+    client_id = db.Column(db.String(255))
+    client_secret = db.Column(db.String(255))
+    scopes = db.Column(db.String(500))
     batches = db.relationship('Batch', backref='client')
 
 class Batch(db.Model):
@@ -178,6 +200,8 @@ class Batch(db.Model):
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     sent_at = db.Column(db.DateTime, nullable=True)
+    cv_filename = db.Column(db.String(255))  # Add this line
+    error = db.Column(db.Text)  # Add this for error tracking
     emails = db.relationship('BatchEmail', backref='batch', cascade='all, delete-orphan')
 
 class BatchEmail(db.Model):
@@ -857,5 +881,5 @@ if __name__ == "__main__":
         initialize_database()
         db.create_all()
         logging.info("Database tables checked/created.")
-    
+        app.debug = True
     app.run(debug=True)
