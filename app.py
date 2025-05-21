@@ -44,7 +44,7 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # App configuration
 app = Flask(__name__)
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')  # Secure in production
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'FLASK_SECRET_KEY=b51ab4564ed11a1b9bdb9081a2e13ecb967bddd08ac0be4460fbbf0caad314a0')  # Secure in production
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///email_sender.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.permanent_session_lifetime = timedelta(days=31)
@@ -183,7 +183,6 @@ class Client(db.Model):
     google_id = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(255))
-    # Add these OAuth fields
     token = db.Column(db.String(255))
     refresh_token = db.Column(db.String(255))
     token_uri = db.Column(db.String(255))
@@ -200,8 +199,8 @@ class Batch(db.Model):
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     sent_at = db.Column(db.DateTime, nullable=True)
-    cv_filename = db.Column(db.String(255))  # Add this line
-    error = db.Column(db.Text)  # Add this for error tracking
+    cv_filename = db.Column(db.String(255))
+    error = db.Column(db.Text)
     emails = db.relationship('BatchEmail', backref='batch', cascade='all, delete-orphan')
 
 class BatchEmail(db.Model):
@@ -218,20 +217,18 @@ class EmailResponse(db.Model):
     subject = db.Column(db.String(255), nullable=False)
     body = db.Column(db.Text, nullable=False)
     received_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 # Utility Functions
 def is_valid_email(email):
     """Basic email format validation"""
     return re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email.strip()) is not None
 
 def create_message_with_attachment(to_email, subject, body, attachment_path=None):
-    """
-    Creates MIME message suitable for Gmail API, including an attachment
-    """
     message = MIMEMultipart()
     message['to'] = to_email
     message['subject'] = subject
     message.attach(MIMEText(body, 'plain'))
-
     if attachment_path and os.path.exists(attachment_path):
         filename = os.path.basename(attachment_path)
         with open(attachment_path, 'rb') as f:
@@ -240,32 +237,18 @@ def create_message_with_attachment(to_email, subject, body, attachment_path=None
         encoders.encode_base64(part)
         part.add_header('Content-Disposition', f'attachment; filename="{filename}"')
         message.attach(part)
-
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
     return {'raw': raw_message}
 
 
 def send_email_gmail_api(creds, to_email, subject, body, attachment_path=None):
-    """
-    Sends an email using the Gmail API with given credentials
-    """
     try:
-        print(f"Building Gmail service for email: {to_email}")
         service = googleapiclient.discovery.build('gmail', 'v1', credentials=creds)
-        
-        print(f"Creating message for: {to_email}")
         message = create_message_with_attachment(to_email, subject, body, attachment_path)
-        
-        print(f"Sending email to: {to_email}")
         sent_message = service.users().messages().send(userId='me', body=message).execute()
-        
-        print(f"Message sent successfully to {to_email}. Message Id: {sent_message['id']}")
-        return True
-    except googleapiclient.errors.HttpError as error:
-        print(f'An API error occurred: {error}')
-        return False, str(error)
+        return True, sent_message['id']
     except Exception as e:
-        print(f'An unexpected error occurred while sending email to {to_email}: {e}')
+        app.logger.error(f'Error sending email to {to_email}: {e}')
         return False, str(e)
 
 
@@ -281,59 +264,34 @@ def admin_required(f):
     return decorated_function
 
 def send_batch_emails_async(batch_id):
-    """
-    Background task to send emails for a batch after admin approval
-    """
     with app.app_context():
         batch = Batch.query.get(batch_id)
         if not batch or batch.status != 'approved':
-            logging.warning(f"Batch {batch_id} not found or not approved for sending.")
+            app.logger.warning(f"Batch {batch_id} not found or not approved for sending.")
             return
-
         if batch.status == 'sending':
-            logging.info(f"Batch {batch.id} already in sending status.")
             return
-
         batch.status = 'sending'
         db.session.commit()
-
         client = batch.client
         if not client:
-            logging.error(f"Client not found for batch {batch.id}")
             batch.status = 'failed'
             db.session.commit()
             return
-
-        try:
-            creds = google.oauth2.credentials.Credentials(
-                token=client.token,
-                refresh_token=client.refresh_token,
-                token_uri=client.token_uri,
-                client_id=client.client_id,
-                client_secret=client.client_secret,
-                scopes=client.scopes.split()
-            )
-            print(f"Credentials created for client {client.id}")
-        except Exception as e:
-            logging.error(f"Failed to create credentials for client {client.id} (Batch {batch.id}): {e}")
-            batch.status = 'failed'
-            batch.error = f"Credential error: {e}"
-            db.session.commit()
-            return
-
+        creds = google.oauth2.credentials.Credentials(
+            token=client.token,
+            refresh_token=client.refresh_token,
+            token_uri=client.token_uri,
+            client_id=client.client_id,
+            client_secret=client.client_secret,
+            scopes=client.scopes.split()
+        )
         cv_path = os.path.join(app.config['UPLOAD_FOLDER'], batch.cv_filename) if batch.cv_filename else None
-        if cv_path and not os.path.exists(cv_path):
-            print(f"CV file not found for batch {batch.id}: {cv_path}")
-            cv_path = None
-
         success_count = 0
         failed_count = 0
-
         for email_entry in batch.emails:
             if email_entry.status in ('sent', 'failed'):
                 continue
-
-            print(f"Attempting to send email to {email_entry.recipient_email} for batch {batch.id}")
             send_success, error_message = send_email_gmail_api(
                 creds,
                 to_email=email_entry.recipient_email,
@@ -341,24 +299,17 @@ def send_batch_emails_async(batch_id):
                 body=batch.body,
                 attachment_path=cv_path
             )
-
             if send_success:
                 email_entry.status = 'sent'
                 success_count += 1
-                print(f"Successfully sent email to {email_entry.recipient_email}")
             else:
                 email_entry.status = 'failed'
                 email_entry.error = error_message or "Unknown error"
                 failed_count += 1
-                print(f"Failed to send email to {email_entry.recipient_email}: {error_message}")
-
             db.session.commit()
-
         batch.status = 'completed'
         batch.sent_at = datetime.utcnow()
         db.session.commit()
-
-        print(f"Batch {batch.id} sending completed: {success_count} success, {failed_count} failed.")
 
 def is_valid_email(email):
     return re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email.strip()) is not None
@@ -568,227 +519,80 @@ def admin_batch_detail(batch_id):
     batch = Batch.query.get_or_404(batch_id)
     if request.method == 'POST':
         action = request.form.get('action')
-        logging.info(f"Admin action '{action}' requested for batch {batch_id} (current status: {batch.status}).")
-
         if batch.status == 'pending':
             if action == 'approve':
                 batch.status = 'approved'
                 db.session.commit()
-                flash(f"Batch {batch.id} approved.", "success")
-                # Start sending in a background thread immediately upon approval
                 threading.Thread(target=send_batch_emails_async, args=(batch.id,)).start()
-                flash("Sending emails for this batch has started in the background.", "info")
+                flash("Batch approved and sending emails has started.", "success")
             elif action == 'reject':
                 batch.status = 'rejected'
                 db.session.commit()
-                flash(f"Batch {batch.id} rejected.", "warning")
+                flash("Batch rejected.", "warning")
             else:
                 flash("Invalid action.", "danger")
-        elif batch.status in ('approved', 'sending', 'completed'):
-             flash(f"Batch {batch.id} cannot be approved or rejected (current status: {batch.status}).", "warning")
-        else: # Rejected status
-             flash(f"Batch {batch.id} has already been rejected.", "warning")
-
-
         return redirect(url_for('admin_batch_detail', batch_id=batch.id))
-
-    # For GET request, render the detail page
     return render_template('admin_batch_detail.html', batch=batch)
-
 
 @app.route('/submit', methods=['GET', 'POST'])
 def submit_batch():
-    # Check if client is logged in using the persistent session
     if 'client_id' not in session:
-        logging.warning("Access to submit page without client_id in session. Redirecting to index.")
         flash("Please login first.", "warning")
         return redirect(url_for('index'))
 
-    # Load learnerships and categories
-    learnerships, categories = load_learnerships()
-
-    # Provide fallback data if loading fails or file is empty
-    if not learnerships:
-        app.logger.warning("Learnerships data is empty or failed to load.")
-        learnerships = [
-            {
-                "id": 0,
-                "company": "Placeholder Company",
-                "program": "Placeholder Program",
-                "email": "placeholder@example.com",
-                "icon": "default.png", # Use default icon
-                "category": "Uncategorized"
-            }
-        ]
-    if not categories:
-        app.logger.warning("Categories data is empty or failed to load.")
-        categories = ["Uncategorized"]
-
     client = Client.query.get(session['client_id'])
-    if not client:
-        # This case indicates a potential issue (client_id in session but no matching user in DB)
-        logging.error(f"Client with ID {session['client_id']} not found in database despite session.")
-        session.clear() # Clear invalid session
-        flash("Your user data was not found. Please log in again.", "danger")
-        return redirect(url_for('index'))
+    learnerships = [{'id': 1, 'email': 'example@test.com'}]
 
-
-    # Fetch the latest batch for this client for status display
     latest_batch = (
         Batch.query.filter_by(client_id=client.id)
-        .order_by(desc(Batch.created_at)) # Order by creation date, latest first
+        .order_by(desc(Batch.created_at))
         .first()
     )
 
-    batch_status = None
-    sending_summary = None
-    if latest_batch:
-        batch_status = latest_batch.status
-        logging.info(f"Latest batch for client {client.id} is batch {latest_batch.id} with status: {batch_status}")
-
-        # Build sending summary for relevant statuses
-        if batch_status in ('approved', 'sending', 'completed', 'failed'): # Include failed batches to show attempt status
-             total_emails = db.session.query(BatchEmail).filter_by(batch_id=latest_batch.id).count()
-             sent_count = db.session.query(BatchEmail).filter_by(batch_id=latest_batch.id, status='sent').count()
-             failed_count = db.session.query(BatchEmail).filter_by(batch_id=latest_batch.id, status='failed').count()
-             pending_count = total_emails - sent_count - failed_count # Emails that haven't been processed yet in 'sending' state
-
-             sending_summary = {
-                'total': total_emails,
-                'sent': sent_count,
-                'failed': failed_count,
-                'pending': pending_count, # Useful for 'sending' state
-                'status': batch_status, # Pass the batch status as well
-                'created_at': latest_batch.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'sent_at': latest_batch.sent_at.strftime('%Y-%m-%d %H:%M:%S') if latest_batch.sent_at else 'N/A'
-             }
-             logging.debug(f"Sending summary for batch {latest_batch.id}: {sending_summary}")
-
     if request.method == 'POST':
-        # Prevent new submission if the latest batch is still pending or sending
         if latest_batch and latest_batch.status in ('pending', 'approved', 'sending'):
-             flash("You have a pending or active application batch. Please wait for it to be processed.", "warning")
-             logging.warning(f"Client {client.id} attempted to submit new batch while latest batch {latest_batch.id} is {latest_batch.status}.")
-             return redirect(url_for('submit_batch'))
-
+            flash("Please wait for your current application to be processed.", "warning")
+            return redirect(url_for('submit_batch'))
 
         selected_learnership_ids = request.form.getlist('learnerships[]')
         cv_file = request.files.get('cv_file')
         subject = request.form.get('subject')
         body = request.form.get('body')
 
-        if not selected_learnership_ids:
-            flash("Please select at least one learnership.", "danger")
+        if not selected_learnership_ids or not cv_file or cv_file.filename == '' or not subject or not body:
+            flash("All fields are required.", "danger")
             return redirect(url_for('submit_batch'))
 
-        if not cv_file or cv_file.filename == '':
-            flash("Please upload your CV.", "danger")
-            return redirect(url_for('submit_batch'))
-
-        if not subject or not body:
-            flash("Subject and body are required.", "danger")
-            return redirect(url_for('submit_batch'))
-
-        # Basic CV file type validation (optional but recommended)
         allowed_extensions = {'pdf', 'doc', 'docx'}
         if '.' not in cv_file.filename or cv_file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
-             flash("Invalid file type. Please upload a PDF, DOC, or DOCX file.", "danger")
-             return redirect(url_for('submit_batch'))
-
+            flash("Invalid file type.", "danger")
+            return redirect(url_for('submit_batch'))
 
         try:
-            # Securely save the CV file
             filename = secure_filename(cv_file.filename)
-            # Prepend client ID or timestamp to filename to avoid conflicts if multiple clients upload files with the same name
-            # Adding a unique prefix ensures filenames are distinct, even if clients have same original filename
             unique_filename = f"{client.id}_{int(datetime.utcnow().timestamp())}_{filename}"
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-
             cv_file.save(filepath)
-            logging.info(f"CV saved to {filepath}")
 
-
-            # Create a new batch record
-            batch = Batch(
-                client=client,
-                subject=subject,
-                body=body,
-                cv_filename=unique_filename, # Save the unique filename
-                status='pending',
-                created_at=datetime.utcnow()
-            )
+            batch = Batch(client=client, subject=subject, body=body, cv_filename=unique_filename)
             db.session.add(batch)
-            db.session.flush() # Assigns an ID to the batch before adding emails
+            db.session.commit()
 
-            # Add recipient emails for each selected learnership
-            added_emails = 0
-            for learnership_id_str in selected_learnership_ids:
-                try:
-                    learnership_id = int(learnership_id_str)
-                    learnership = next((l for l in learnerships if l['id'] == learnership_id), None)
-                    if learnership and is_valid_email(learnership.get('email')):
-                        email_entry = BatchEmail(
-                            batch_id=batch.id, # Link to the created batch
-                            recipient_email=learnership['email'],
-                            status='pending'
-                        )
-                        db.session.add(email_entry)
-                        added_emails += 1
-                    elif learnership:
-                        logging.warning(f"Learnership ID {learnership_id} has invalid or missing email: {learnership.get('email')}")
-                    else:
-                        logging.warning(f"Learnership ID {learnership_id} not found in loaded data.")
+            for learnership_id in selected_learnership_ids:
+                learnership_email = 'some_email@example.com'
+                if learnership_email:
+                    email_entry = BatchEmail(batch_id=batch.id, recipient_email=learnership_email)
+                    db.session.add(email_entry)
+            db.session.commit()
 
-                except ValueError:
-                    logging.warning(f"Invalid learnership ID received: {learnership_id_str}")
-                    flash(f"Skipping invalid learnership selection: {learnership_id_str}", "warning")
-
-            if added_emails == 0:
-                # If no valid emails were added, abort the batch
-                db.session.rollback() # Rollback the batch creation and any associated emails
-                # Clean up the uploaded file if no batch was created
-                if os.path.exists(filepath):
-                    try:
-                        os.remove(filepath)
-                        logging.info(f"Removed orphaned CV file: {filepath}")
-                    except Exception as remove_e:
-                        logging.error(f"Error removing orphaned CV file {filepath}: {remove_e}")
-
-                flash("No valid learnership emails were selected or found. Application not submitted.", "danger")
-                logging.error(f"Batch creation aborted for client {client.id}: no valid emails added.")
-                return redirect(url_for('submit_batch'))
-
-
-            db.session.commit() # Commit the batch and all associated emails
-
-            flash("Application batch submitted successfully! Awaiting admin approval.", "success")
-            logging.info(f"Batch {batch.id} created for client {client.id} with {added_emails} recipients.")
+            flash("Application batch submitted!", "success")
             return redirect(url_for('submit_batch'))
 
         except Exception as e:
-            # Catch any exception during processing, rollback transaction
-            db.session.rollback()
-            logging.error(f"Error during batch submission for client {client.id}: {str(e)}", exc_info=True)
-            flash(f"Error submitting application: {str(e)}", "danger")
+            app.logger.error(f"Error during batch submission: {str(e)}", exc_info=True)
+            flash("Error submitting application.", "danger")
 
-            # Attempt to clean up the uploaded file if it exists and error occurred after saving
-            if 'filepath' in locals() and os.path.exists(filepath):
-                 try:
-                     os.remove(filepath)
-                     logging.info(f"Removed orphaned CV file after error: {filepath}")
-                 except Exception as remove_e:
-                     logging.error(f"Error removing orphaned CV file {filepath} after error: {remove_e}")
-
-            return redirect(url_for('submit_batch'))
-
-    # For GET request, render the submission form
-    return render_template(
-        'submit.html',
-        learnerships=learnerships,
-        categories=categories,
-        batch_status=batch_status,
-        sending_summary=sending_summary
-    )
+    return render_template('submit.html', learnerships=learnerships)
 
 # Debug route for learnerships
 @app.route('/debug/learnerships')
