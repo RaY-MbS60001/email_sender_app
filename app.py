@@ -273,11 +273,14 @@ def send_batch_emails_async(batch_id):
             return
         batch.status = 'sending'
         db.session.commit()
+        app.logger.info(f"Starting to send emails for batch {batch_id}.")
+        
         client = batch.client
         if not client:
             batch.status = 'failed'
             db.session.commit()
             return
+        
         creds = google.oauth2.credentials.Credentials(
             token=client.token,
             refresh_token=client.refresh_token,
@@ -286,9 +289,11 @@ def send_batch_emails_async(batch_id):
             client_secret=client.client_secret,
             scopes=client.scopes.split()
         )
+        
         cv_path = os.path.join(app.config['UPLOAD_FOLDER'], batch.cv_filename) if batch.cv_filename else None
         success_count = 0
         failed_count = 0
+        
         for email_entry in batch.emails:
             if email_entry.status in ('sent', 'failed'):
                 continue
@@ -307,12 +312,12 @@ def send_batch_emails_async(batch_id):
                 email_entry.error = error_message or "Unknown error"
                 failed_count += 1
             db.session.commit()
+        
         batch.status = 'completed'
         batch.sent_at = datetime.utcnow()
         db.session.commit()
+        app.logger.info(f"Completed sending emails for batch {batch_id}. Success: {success_count}, Failed: {failed_count}")
 
-def is_valid_email(email):
-    return re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email.strip()) is not None
 
 # Static Page Routes
 @app.route('/privacy')
